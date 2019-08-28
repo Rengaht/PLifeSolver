@@ -21,3 +21,16 @@ $RECYCLE.BIN/
 # =========================
 # Operating System Files
 # =========================
+*.dll
+*.obj
+*.tlog
+*.cache
+*.pdb
+*.log
+*.res
+*.exe
+*.lib
+*.ilk
+*.exp
+*.opendb
+*.db

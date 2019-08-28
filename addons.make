@@ -1,0 +1,4 @@
+ofxCv
+ofxHttpUtils
+ofxJSON
+ofxTrueTypeFontUC
