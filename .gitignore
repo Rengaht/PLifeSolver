@@ -34,3 +34,6 @@ $RECYCLE.BIN/
 *.exp
 *.opendb
 *.db
+
+bin/data/raw
+.vs

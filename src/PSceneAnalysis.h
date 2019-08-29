@@ -20,6 +20,8 @@ public:
 		_img_hint.loadImage("ui_img/hint_analysis.png");
 
 		setup();
+
+		ofAddListener(_timer_in[0].finish_event,this,&PSceneAnalysis::onSceneInFinish);
 	}
 	void drawLayer(int i){
 		switch(i){
@@ -35,6 +37,9 @@ public:
 
 	void init(){
 		SceneBase::init();
+	}
+	void onSceneInFinish(int &e){
+		_ptr_app->sendFaceRequest();
 	}
 };
 

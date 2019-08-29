@@ -23,6 +23,7 @@ class ofApp : public ofBaseApp{
 
 		/* scene */
 		enum PStage {PSLEEP,PAUTH,PDETECT,PANALYSIS,PRESULT,PEMPTY};
+		enum PJuice {RED_DRAGON,HONEY_LEMON,VEGETABLE,BEETROOT,CARROT,COCONUT,PINEAPPLE,ORANGE_PASSION};
 		PStage _stage,_stage_pre,_stage_next;
 		SceneBase* _scene[5];
 
@@ -39,10 +40,25 @@ class ofApp : public ofBaseApp{
 		void sendFaceRequest();
 		ofxHttpUtils _http_utils;
 		void urlResponse(ofxHttpResponse & response);
+		void parseFaceData(string data_);
+		int getJuiceFromEmotion(ofxJSONElement emotion_);
+		
+		PJuice getJuice(string mood_);
+		bool checkJuiceStorage(PJuice get_);
+
+
+
+		ofEvent<int> _event_recieve_emotion;
+
 
 		bool faceFound();
 		void drawFaceFrame();
 
+		vector<ofRectangle> _rect_face;
+		ofxJSONElement _user_data;
+
+		string _user_id;
+		void createUserID();
 
 		/* basic */
 

@@ -82,6 +82,9 @@ void ofApp::keyPressed(int key){
 		case 'Q':
 			prepareScene(PSLEEP);
 			break;
+		case 't':
+			sendFaceRequest();
+			break;
 	}
 }
 
@@ -128,6 +131,12 @@ void ofApp::setStage(PStage set_){
 
 	_scene[set_]->init();
 
+	switch(set_){
+		case PDETECT:
+			createUserID();
+			break;
+	}
+
 	_stage=set_;
 }
 
@@ -141,24 +150,136 @@ void ofApp::setupCamera(){
 }
 
 void ofApp::setCameraPause(bool set_){
+	
+
+}
+void ofApp::createUserID(){
+	_user_id="mm"+ofGetTimestampString();
 
 }
 
 void ofApp::drawFaceFrame(){
+	ofPushStyle();
+    ofSetColor(255,0,0);
+    ofNoFill();
+    
+    int len=_finder.size();
+    for(int i=0;i<len;++i){
+        ofDrawRectangle(_finder.getObject(i));
 
+        auto rec_=_finder.getObject(i);
+        
+        ofSetColor(255);
+        ofPushMatrix();
+        ofTranslate(rec_.getPosition());
+        _img_frame.draw(0,0,rec_.getWidth(),rec_.getHeight());
+        ofPopMatrix();
+    }
+    ofPopStyle();
 }
 bool ofApp::faceFound(){
     return _finder.size()>0;
 }
 
 void ofApp::sendFaceRequest(){
+	ofLog()<<">>>>>> Send Face Requeset...";
 
+	string url_="https://naturalbenefits-lifesolver.cognitiveservices.azure.com/face/v1.0/detect?returnFaceAttributes=age,gender,emotion,smile&returnFaceLandmarks=true";	
+	
+	ofImage tmp_;
+    tmp_.setFromPixels(_camera.getPixels().getData(),_camera.getWidth(),_camera.getHeight(),OF_IMAGE_COLOR);
+    tmp_.mirror(false, true);
+    tmp_.save("raw/"+_user_id+".jpg");
+    ofBuffer data_=ofBufferFromFile("raw/"+_user_id+".jpg",true);
+
+	ofxHttpForm form_;
+    form_.action=url_;
+    form_.method=OFX_HTTP_POST;
+    form_.name="Face Request "+ofToString(ofGetElapsedTimeMillis());
+    form_.addHeaderField("Ocp-Apim-Subscription-Key", "2ff65a4e2b5e4ca989c288f502738d63");
+    form_.contentType="application/octet-stream";
+    form_.data=data_;
+    
+    _http_utils.addForm(form_);
+
+	//_http_utils.postData(url_,data_,"application/octet-stream");
 
 }
-void ofApp::urlResponse(ofxHttpResponse &resp){
+void ofApp::urlResponse(ofxHttpResponse &resp_){
+	if(resp_.status != 200){
+        ofLog()<<"Requeset error: "<<resp_.reasonForStatus;
+        //prepareStatus(PSLEEP);
+        return;
+    }
+
+	if(resp_.url.find("azure.com")!=-1){
+        //ofLog()<<"receive: "<<resp_.responseBody;
+        parseFaceData(resp_.responseBody);
+        
+        if(_stage==PANALYSIS){
+            int event=_stage;
+			ofNotifyEvent(_event_recieve_emotion,event);
+			prepareScene(PRESULT);
+        }
+       
+             
+	}
+}
+void ofApp::parseFaceData(string data_){
+	//ofLog()<<"get face data: "<<data_;
+    
+	ofxJSONElement json_;
+	if(json_.parse(data_)){
+		int len=json_.size();
+		for(int i=0;i<1;++i){
+			ofRectangle rect_(json_[i]["faceRectangle"]["left"].asInt(),
+								json_[i]["faceRectangle"]["top"].asInt(),
+								json_[i]["faceRectangle"]["width"].asInt(),
+								json_[i]["faceRectangle"]["height"].asInt());
+			_rect_face.push_back(rect_);
+
+            int idx_=getJuiceFromEmotion(json_[i]["faceAttributes"]["emotion"]);
+
+		}
+        _user_data["face"]=json_;
+	}
 
 }
+int ofApp::getJuiceFromEmotion(ofxJSONElement emotion_){
 
+	// find highest score
+	float val_=0;
+	string mood_;
+	int juice_;
+	auto name_=emotion_.getMemberNames();
+	
+	for(auto& n:name_){
+		int t=getJuice(n);
+		if(emotion_[n].asFloat()>val_ && checkJuiceStorage((PJuice)t)){
+			mood_=n;
+			juice_=t;
+			val_=emotion_[n].asFloat();
+		}
+	}
+	
+	ofLog()<<mood_<<" ---> "<<juice_;
+	return juice_;
+}
+ofApp::PJuice ofApp::getJuice(string mood_){
+
+	if(mood_=="disgust") return RED_DRAGON;
+	if(mood_=="neutral") return HONEY_LEMON;
+	if(mood_=="sadness") return VEGETABLE;
+	if(mood_=="fear") return BEETROOT;
+	if(mood_=="anger") return COCONUT;
+	if(mood_=="contempt") return PINEAPPLE;
+	if(mood_=="happiness") return ORANGE_PASSION;
+	
+}
+bool ofApp::checkJuiceStorage(PJuice get_){
+	//TODO!!!
+	return true;
+}
 
 void ofApp::drawOutFrame(){
 	
