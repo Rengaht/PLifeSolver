@@ -39,7 +39,7 @@ public:
 		SceneBase::init();
 	}
 	void onSceneInFinish(int &e){
-		_ptr_app->sendFaceRequest();
+		//_ptr_app->sendFaceRequest();
 	}
 };
 

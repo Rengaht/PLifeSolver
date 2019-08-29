@@ -3,6 +3,7 @@
 #define PSCENE_SLEEP_H
 
 #include "PSceneBase.h"
+#include "PGlowLine.h"
 
 #define FACE_DETECT_FRAME 4000
 
@@ -13,6 +14,9 @@ class PSceneSleep:public SceneBase{
 	ofImage _img_text;
 	
 	int _index_face_start;
+
+	PGlowLine _glow;
+
 public:
 	PSceneSleep(ofApp* set_):SceneBase(set_){
 		_mlayer=2;
@@ -23,12 +27,15 @@ public:
 		_img_hint.loadImage("ui_img/hint_sleep.png");
 		_img_text.loadImage("ui_img/text_sleep.png");
 
+		_glow=PGlowLine(540,540,400,400,60);
+
 		setup();
 	}
 	void drawLayer(int i){
 		switch(i){
 			case 0:
 				_img_text.draw(0,0);
+				_glow.draw();
 				break;
 			case 1:
 				_img_hint.draw(0,0);
@@ -38,7 +45,7 @@ public:
 	}
 	void update(float dt_){
 		SceneBase::update(dt_);
-
+		_glow.update(dt_);
 		
 		 if(_ptr_app->faceFound()){
             if(_index_face_start<0){

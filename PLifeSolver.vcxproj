@@ -218,6 +218,7 @@
     <ClInclude Include="..\..\..\addons\ofxJSON\libs\jsoncpp\include\json\json-forwards.h" />
     <ClInclude Include="..\..\..\addons\ofxJSON\libs\jsoncpp\include\json\json.h" />
     <ClInclude Include="..\..\..\addons\ofxTrueTypeFontUC\src\ofxTrueTypeFontUC.h" />
+    <ClInclude Include="src\PGlowLine.h" />
     <ClInclude Include="src\PSceneAnalysis.h" />
     <ClInclude Include="src\PSceneAuth.h" />
     <ClInclude Include="src\PSceneBase.h" />

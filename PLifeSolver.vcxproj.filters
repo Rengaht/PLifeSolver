@@ -230,6 +230,9 @@
     <ClInclude Include="src\PSceneResult.h">
       <Filter>src</Filter>
     </ClInclude>
+    <ClInclude Include="src\PGlowLine.h">
+      <Filter>src</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="icon.rc" />
