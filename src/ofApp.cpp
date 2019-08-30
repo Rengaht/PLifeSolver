@@ -106,6 +106,10 @@ void ofApp::loadScene(){
 
 	_img_frame.loadImage("ui_img/frame_sleep.png");
 	_img_mask.loadImage("ui_img/mask-08.png");
+
+	for(int i=1;i<=5;++i){
+		_img_number[i-1].loadImage("ui_img/number-"+ofToString(i)+".png");
+	}
 }
 
 void ofApp::onSceneInFinish(int &e){

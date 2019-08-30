@@ -69,6 +69,7 @@ class ofApp : public ofBaseApp{
 		void keyPressed(int key);
 		void mouseReleased(int x, int y, int button);
 
+		ofImage _img_number[5];
 
 	private:
 
