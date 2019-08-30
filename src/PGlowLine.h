@@ -4,6 +4,8 @@
 
 #define ANIM_VEL 800
 #define LINE_ANGLE 6
+#define LBORDER 1.0
+#define LWIDTH 5.0
 
 #include "ofMain.h"
 #include "FrameTimer.h"
@@ -15,22 +17,24 @@ class PGlowLine{
 	ofVec2f _pos;
 	ofVec2f _size;
 	
-	float _length;
 	float _ang;
 	int _mline;
 
 public:
+
+	float _length;
+
 	PGlowLine(){}
 	PGlowLine(float x, float y, float radx, float rady, float ang_){
 		_pos=ofVec2f(x,y);
 		_size=ofVec2f(radx,rady);
 		_ang=ofDegToRad(ang_);
-		_length=.8;
+		_length=.75;
 		
 		_mline=ang_/(float)LINE_ANGLE;
 
 		_timer=FrameTimer(ANIM_VEL);
-		_timer2=FrameTimer(ANIM_VEL*1.2);
+		_timer2=FrameTimer(ANIM_VEL);
 		_timer.restart();
 		_timer2.restart();
 	}
@@ -40,45 +44,78 @@ public:
 		if(_timer.val()==1) _timer.restart();
 		if(_timer2.val()==1) _timer2.restart();
 	}
-	void draw(){
-
-		ofPushStyle();
-		ofSetColor(29,79,144);
-		ofSetLineWidth(8);
+	void draw(float alpha_=1.0){
 
 		ofPushMatrix();
 		ofTranslate(_pos);
 		
 		float ang_per_line=ofDegToRad(LINE_ANGLE);
 		float ang_start=-_ang/2.0;
+		
 		float anim_=_timer.valEaseInOut();
-		float stretch_=_length+(1.0-_length)*sin(anim_*PI);
-		//float shrink_=_length+(1.0-_length)*(1.0-sin(anim_*PI));
-		float shrink_=_length+(1.0-_length)*sin(_timer2.valEaseInOut()*PI);
+		float anim2_=_timer2.valEaseInOut();
+
+		float stretch_start_=_length+(1.0-_length)*valStart(anim_);
+		float stretch_end_=_length+(1.0-_length)*valEnd(anim_);
+		
+		float shrink_start_=_length+(1.0-_length)*.3*valStart(anim2_);
+		float shrink_end_=_length+(1.0-_length)*.3*valEnd(anim2_);
 
 		for(int i=0;i<_mline;++i){
 			float a_=ang_per_line*i+ang_start;
 			if(i%2==0){
-				ofLine(_size.x*_length*cos(a_),_size.y*_length*sin(a_),
-						_size.x*stretch_*cos(a_),_size.y*stretch_*sin(a_));
-				ofLine(-_size.x*_length*cos(a_),_size.y*_length*sin(a_),
-						-_size.x*stretch_*cos(a_),_size.y*stretch_*sin(a_));
+				
+				ofPushMatrix();
+				ofTranslate(_size.x*stretch_start_*cos(a_),_size.y*stretch_start_*sin(a_));
+				ofRotate(ofRadToDeg(a_));
+					drawLine(_size.x*cos(a_)*(stretch_end_-stretch_start_),alpha_);
+				ofPopMatrix();
+				
+				ofPushMatrix();
+				ofTranslate(_size.x*stretch_start_*cos(a_+PI),_size.y*stretch_start_*sin(a_+PI));
+				ofRotate(ofRadToDeg(a_+PI));
+					drawLine(_size.x*cos(a_)*(stretch_end_-stretch_start_),alpha_);				
+				ofPopMatrix();
+
+				
 			}else{
-				ofLine(_size.x*_length*cos(a_),_size.y*_length*sin(a_),
-						_size.x*shrink_*cos(a_),_size.y*shrink_*sin(a_));
-				ofLine(-_size.x*_length*cos(a_),_size.y*_length*sin(a_),
-						-_size.x*shrink_*cos(a_),_size.y*shrink_*sin(a_));
+				ofPushMatrix();
+				ofTranslate(_size.x*shrink_start_*cos(a_),_size.y*shrink_start_*sin(a_));
+				ofRotate(ofRadToDeg(a_));
+					drawLine(_size.x*cos(a_)*(shrink_end_-shrink_start_),alpha_);
+				ofPopMatrix();
+				
+				ofPushMatrix();
+				ofTranslate(_size.x*shrink_start_*cos(a_+PI),_size.y*shrink_start_*sin(a_+PI));
+				ofRotate(ofRadToDeg(a_+PI));
+					drawLine(_size.x*cos(a_)*(shrink_end_-shrink_start_),alpha_);				
+				ofPopMatrix();
+			
 			}
 
 		}
 
 		ofPopMatrix();
 
+	}
+	void drawLine(float len_,float alpha_=1.0){
+		ofPushStyle();
+		ofSetColor(229,202,133,alpha_*255);
+			ofDrawRectangle(0,0,len_,LWIDTH);
+		ofSetColor(29,79,144,alpha_*255);
+			ofDrawRectangle(LBORDER,LBORDER,max(0.0,len_-2*LBORDER),LWIDTH-2*LBORDER);
 		ofPopStyle();
 	}
 
-
-
+	float valEnd(float val_){
+		if(val_<.66) return val_/2*3;
+		return 1;
+	}
+	float valStart(float val_){
+		if(val_<.66) return 0;
+		return (val_-.66)*3;
+	}
+	
 };
 
 #endif

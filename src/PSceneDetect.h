@@ -10,6 +10,8 @@ class PSceneDetect:public SceneBase{
 	FrameTimer _timer_detect;
 	ofImage _img_hint;
 	ofImage _img_text;
+
+	PGlowLine _glow;
 public:
 	PSceneDetect(ofApp* set_):SceneBase(set_){
 		_mlayer=2;
@@ -24,6 +26,8 @@ public:
 
 		ofAddListener(_timer_detect.finish_event,this,&PSceneDetect::onTimerDetectFinish);
 		ofAddListener(_timer_in[1].finish_event,this,&PSceneDetect::onSceneInFinish);
+
+		_glow=PGlowLine(540,915,200,150,30);
 	}
 	void drawLayer(int i){
 		switch(i){
@@ -32,13 +36,16 @@ public:
 				break;
 			case 1:
 				_img_hint.draw(0,0);
+				_glow.draw(getLayerAlpha(1));
 				break;
 		}
 
 	}
 	void update(float dt_){
 		SceneBase::update(dt_);
+
 		_timer_detect.update(dt_);
+		_glow.update(dt_);
 	}
 
 	void init(){

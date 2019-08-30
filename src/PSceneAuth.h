@@ -10,6 +10,8 @@ class PSceneAuth:public SceneBase{
 	ofImage _img_hint;
 	ofImage _img_text;
 
+	PGlowLine _glow;
+
 public:
 	PSceneAuth(ofApp* set_):SceneBase(set_){
 		_mlayer=2;
@@ -25,6 +27,8 @@ public:
 		ofAddListener(_timer_hint.finish_event,this,&PSceneAuth::onTimerHintFinish);
 		ofAddListener(_timer_in[1].finish_event,this,&PSceneAuth::onSceneInFinish);
 
+		_glow=PGlowLine(540,915,200,150,30);
+
 	}
 	void drawLayer(int i){
 		switch(i){
@@ -33,6 +37,7 @@ public:
 				break;
 			case 1:
 				_img_hint.draw(0,0);
+				_glow.draw(getLayerAlpha(1));
 				break;
 		}
 
@@ -41,7 +46,7 @@ public:
 		SceneBase::update(dt_);
 		
 		_timer_hint.update(dt_);
-
+		_glow.update(dt_);
 	}
 
 	void init(){

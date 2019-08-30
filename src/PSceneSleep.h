@@ -27,7 +27,7 @@ public:
 		_img_hint.loadImage("ui_img/hint_sleep.png");
 		_img_text.loadImage("ui_img/text_sleep.png");
 
-		_glow=PGlowLine(540,540,400,400,60);
+		_glow=PGlowLine(540,540,420,420,60);
 
 		setup();
 	}
@@ -35,7 +35,7 @@ public:
 		switch(i){
 			case 0:
 				_img_text.draw(0,0);
-				_glow.draw();
+				_glow.draw(getLayerAlpha(0));
 				break;
 			case 1:
 				_img_hint.draw(0,0);
@@ -52,7 +52,7 @@ public:
                 _index_face_start=0;
                 ofLog()<<"---------- detect face ---------- ";
             }else{
-                if(_index_face_start>=FACE_DETECT_FRAME) _ptr_app->prepareScene(ofApp::PDETECT);
+                if(_index_face_start>=FACE_DETECT_FRAME) _ptr_app->prepareScene(ofApp::PAUTH);
                 _index_face_start+=dt_;
             }
         }else{
