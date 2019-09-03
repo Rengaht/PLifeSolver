@@ -36,4 +36,6 @@ $RECYCLE.BIN/
 *.db
 
 bin/data/raw
+bin/data/tmp
+bin/data/output
 .vs

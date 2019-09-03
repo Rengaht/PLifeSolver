@@ -30,6 +30,14 @@ void ofApp::setup(){
 
 	_millis_now=ofGetElapsedTimeMillis();
 
+
+	_fbo_save.allocate(SCREEN_HEIGHT,SCREEN_HEIGHT);
+	_recorder.setFormat("png");
+	_recording=false;
+	
+	ofAddListener(_recorder.recordFinish,this,&ofApp::onRecorderFinish);
+	_recorder.startThread();
+
 	ofEnableSmoothing();
 }
 
@@ -45,7 +53,11 @@ void ofApp::update(){
 	    if(_stage==PSLEEP && _camera.isFrameNew()){
 			_finder.update(_camera);
 		}		
+
+		if(_recording && ofGetFrameNum()%10==0) saveCameraFrame();
 	}
+
+	
 
 	_scene[_stage]->update(dt_);
 }
@@ -92,6 +104,9 @@ void ofApp::keyPressed(int key){
 void ofApp::mouseReleased(int x, int y, int button){
 
 }
+void ofApp::exit(){
+	_recorder.waitForThread();
+}
 
 
 
@@ -106,6 +121,7 @@ void ofApp::loadScene(){
 
 	_img_frame.loadImage("ui_img/frame_sleep.png");
 	_img_mask.loadImage("ui_img/mask-08.png");
+	_img_share.loadImage("ui_img/frame_share.png");
 
 	for(int i=1;i<=5;++i){
 		_img_number[i-1].loadImage("ui_img/number-"+ofToString(i)+".png");
@@ -155,7 +171,7 @@ void ofApp::setupCamera(){
 
 void ofApp::setCameraPause(bool set_){
 	
-
+	_camera_paused=set_;
 }
 void ofApp::createUserID(){
 	_user_id="mm"+ofGetTimestampString();
@@ -292,5 +308,41 @@ void ofApp::drawOutFrame(){
 }
 
 
+void ofApp::setRecord(bool set_){
+	_recording=set_;
+	if(set_){
+		_idx_record=0;
+		_recorder.setPrefix(ofToDataPath("tmp/"+_user_id+"_"));
+		
+		//_recorder.startThread();
+		ofSystem("DEL /F/Q "+ofToDataPath("tmp\\")+"*.png");
 
+		ofLog()<<"start recording.... "<<ofGetElapsedTimeMillis();
+	}else{
+		ofLog()<<"end recording..."<<ofGetElapsedTimeMillis()<<" #fr= "<<_idx_record;
+	}
+}
+void ofApp::saveCameraFrame(){
+	_fbo_save.begin();
+	ofClear(255);
+		_camera.draw(_fbo_save.getWidth()/2-_camera.getWidth()/2,_fbo_save.getHeight()/2-_camera.getHeight()/2);
+		_img_share.draw(0,0);
+	_fbo_save.end();
 
+	ofPixels pix;
+    _fbo_save.readToPixels(pix);
+    _recorder.addFrame(pix);
+
+	_idx_record++;
+}
+void ofApp::onRecorderFinish(int &e){
+	ofLog()<<"Recorder finish!!!";
+
+	
+	string cmd="\"C:\\Program Files\\ImageMagick-7.0.8-Q16\\magick.exe\" "+ofToDataPath("tmp/")+"*.png "
+				+"-reverse "+ofToDataPath("tmp/")+"*.png -loop 0 -resize 800x800 "
+				+ofToDataPath("output/")+_user_id+".gif";
+	ofLog()<<cmd;
+	ofSystem(cmd);
+
+}

@@ -1,4 +1,5 @@
 ofxCv
 ofxHttpUtils
+ofxImageSequence
 ofxJSON
 ofxTrueTypeFontUC

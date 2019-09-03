@@ -12,6 +12,7 @@
 #include "ofxCv.h"
 #include "ofxHttpUtils.h"
 #include "ofxJSON.h"
+#include "ofxImageSequenceRecorder.h"
 #include "PSceneBase.h"
 
 using namespace cv;
@@ -60,6 +61,13 @@ class ofApp : public ofBaseApp{
 		string _user_id;
 		void createUserID();
 
+		ofImage _img_number[5];
+
+		bool _recording;
+		int _idx_record;
+		void setRecord(bool set_);
+
+
 		/* basic */
 
 		void setup();
@@ -68,8 +76,8 @@ class ofApp : public ofBaseApp{
 
 		void keyPressed(int key);
 		void mouseReleased(int x, int y, int button);
-
-		ofImage _img_number[5];
+		void exit();
+	
 
 	private:
 
@@ -83,4 +91,11 @@ class ofApp : public ofBaseApp{
 
 		void setStage(PStage set_);
 
+		
+		ofImage _img_share;
+		ofFbo _fbo_save;
+		ofxImageSequenceRecorder _recorder;    
+		void saveCameraFrame();
+		void onRecorderFinish(int &e);
+		
 };
