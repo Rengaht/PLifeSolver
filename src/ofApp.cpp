@@ -351,10 +351,10 @@ void ofApp::onRecorderFinish(int &e){
 	ofLog()<<"Recorder finish!!!";
 
 	
-	string cmd="\"C:\\Program Files\\ImageMagick-7.0.8-Q16\\magick.exe\" "+ofToDataPath("tmp/")+"*.png "
-				+"-reverse "+ofToDataPath("tmp/")+"*.png -loop 0 -resize 800x800 "
-				+ofToDataPath("output/")+_user_id+".gif";
-	ofLog()<<cmd;
-	ofSystem(cmd);
+	//string cmd="\"C:\\Program Files\\ImageMagick-7.0.8-Q16\\magick.exe\" "+ofToDataPath("tmp/")+"*.png "
+	//			+"-reverse "+ofToDataPath("tmp/")+"*.png -loop 0 -resize 800x800 "
+	//			+ofToDataPath("output/")+_user_id+".gif";
+	//ofLog()<<cmd;
+	//ofSystem(cmd);
 
 }

@@ -51,10 +51,17 @@ public:
 				_save_count++;
 				
 				if(counter==_save_count){
-					ofNotifyEvent(recordFinish,counter,this);
+					
 					counter=0;
 					_save_count=0;
 					//stopThread();
+					string cmd="\"C:\\Program Files\\ImageMagick-7.0.8-Q16\\magick.exe\" "+ofToDataPath("tmp/")+"*.png "
+							+"-reverse "+ofToDataPath("tmp/")+"*.png -loop 0 -resize 800x800 "
+							+ofToDataPath("output/")+_user_id+".gif";
+					ofLog()<<cmd;
+					ofSystem(cmd);
+
+					ofNotifyEvent(recordFinish,counter,this);
 				}
 			}
         }

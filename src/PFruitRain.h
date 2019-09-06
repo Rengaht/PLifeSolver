@@ -5,7 +5,7 @@
 #define FRUIT_GROUP 8
 #define FRUIT_BORDER 50
 #define FRUIT_VEL 3
-#define FRUIT_ACC 0.1
+#define FRUIT_ACC 0.01
 #define FRUIT_DENSITY 8
 #define FRUIT_SCALE .25
 
@@ -23,15 +23,17 @@ public:
 	float _ang;
 	ofImage* _img;
 
-	PFruit(int idx_,ofImage* img_,ofVec2f pos_){
+	PFruit(int idx_,ofImage* img_,ofVec2f pos_,float ang_){
 		
 		_index=idx_;
 		_img=img_;
-		_ang=ofRandom(360);
+		_ang=ang_;
 
 		_pos=pos_;
-		_vel=ofVec2f(0,ofRandom(.8,1.2)*FRUIT_VEL);
-		_acc=ofVec2f(FRUIT_ACC*ofRandom(-.2,.2),FRUIT_ACC*ofRandom(0.9,1.1));
+		/*_vel=ofVec2f(0,ofRandom(.8,1.2)*FRUIT_VEL);
+		_acc=ofVec2f(FRUIT_ACC*ofRandom(-.2,.2),FRUIT_ACC*ofRandom(0.9,1.1));*/
+		_vel=ofVec2f(0,FRUIT_VEL);
+		_acc=ofVec2f(0,FRUIT_ACC);
 	}
 	void update(float dt_){
 		_pos+=_vel;
@@ -76,6 +78,10 @@ public:
 		reset();
 		addNewFruit();
 		_timer_rain=FrameTimer(FRUIT_RAIN_INTERVAL);
+		_timer_rain.setContinuous(true);
+		ofAddListener(_timer_rain.finish_event,this,&PFruitRain::onRainFinish);
+
+
 		_timer_group=FrameTimer(FRUIT_GROUP_INTERVAL);
 		
 	}
@@ -115,13 +121,22 @@ public:
 		float grid_=(ofGetHeight()+FRUIT_BORDER*2)/(float)FRUIT_DENSITY;
 		
 
-		for(int i=0;i<FRUIT_DENSITY;++i){
-			int idx_=floor(ofRandom(_idx_fruit[_idx_group].size()));
+		for(int i=0;i<=FRUIT_DENSITY;++i){
+
+			if(_timer_rain.num()%2==0){
+				if(i%2==0) continue;
+			}else{
+				if(i%2==1) continue;
+			}
+			int idx_=i%_idx_fruit[_idx_group].size();//floor(ofRandom(_idx_fruit[_idx_group].size()));
 			auto it=_img_fruit[_idx_group].begin();
 			advance(it,idx_);
-			_fruit.push_back(PFruit(idx_,&(*it),
+			/*_fruit.push_back(PFruit(idx_,&(*it),
 									ofVec2f((i+ofRandom(-.1,.1))*grid_-FRUIT_BORDER,
-											-(*it).getHeight()*FRUIT_SCALE*ofRandom(1,3))));
+											-(*it).getHeight()*FRUIT_SCALE*ofRandom(1,3))));*/
+			_fruit.push_back(PFruit(idx_,&(*it),
+									ofVec2f((i)*grid_-FRUIT_BORDER,
+											-(*it).getHeight()),(i%2==0?45:-45)));
 		}
 	}
 
@@ -133,10 +148,7 @@ public:
 
 
 		_timer_rain.update(dt_);
-		if(_timer_rain.val()==1){
-			addNewFruit();
-			_timer_rain.restart();
-		}
+		
 		_timer_group.update(dt_);
 		if(_timer_group.val()==1){
 			(++_idx_group)%=FRUIT_GROUP;
@@ -154,7 +166,9 @@ public:
 	void draw(){
 		for(auto& f:_fruit) f.draw();
 	}
-
+	void onRainFinish(int &e){
+		addNewFruit();
+	}
 
 };
 
