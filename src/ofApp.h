@@ -7,6 +7,8 @@
 #define SCREEN_WIDTH 1920
 #define SCREEN_HEIGHT 1080
 
+#define FRUIT_COUNT 18
+
 #include "ofMain.h"
 
 #include "ofxCv.h"
@@ -14,6 +16,8 @@
 #include "ofxJSON.h"
 #include "ofxImageSequenceRecorder.h"
 #include "PSceneBase.h"
+#include "PFruitRain.h"
+
 
 using namespace cv;
 using namespace ofxCv;
@@ -67,6 +71,7 @@ class ofApp : public ofBaseApp{
 		int _idx_record;
 		void setRecord(bool set_);
 
+		
 
 		/* basic */
 
@@ -97,5 +102,8 @@ class ofApp : public ofBaseApp{
 		ofxImageSequenceRecorder _recorder;    
 		void saveCameraFrame();
 		void onRecorderFinish(int &e);
+
+
+		PFruitRain _fruit_rain;
 		
 };

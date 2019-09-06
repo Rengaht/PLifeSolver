@@ -34,7 +34,10 @@ public:
 		_mline=ang_/(float)LINE_ANGLE;
 
 		_timer=FrameTimer(ANIM_VEL);
+		
 		_timer2=FrameTimer(ANIM_VEL);
+		_timer2.setContinuous(true);
+
 		_timer.restart();
 		_timer2.restart();
 	}
@@ -42,7 +45,7 @@ public:
 		_timer.update(dt_);
 		_timer2.update(dt_);
 		if(_timer.val()==1) _timer.restart();
-		if(_timer2.val()==1) _timer2.restart();
+		//if(_timer2.val()==1) _timer2.restart();
 	}
 	void draw(float alpha_=1.0){
 

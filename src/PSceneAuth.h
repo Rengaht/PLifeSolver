@@ -25,9 +25,9 @@ public:
 		_timer_hint=FrameTimer(1000);
 		_timer_confirm=FrameTimer(3000);
 
-		_img_hint.loadImage("ui_img/hint_auth.png");
-		_img_text.loadImage("ui_img/text_auth.png");
-		_img_confirm.loadImage("ui_img/hint_confirm.png");
+		_img_hint.loadImage("_img_ui/hint_auth.png");
+		_img_text.loadImage("_img_ui/text_auth.png");
+		_img_confirm.loadImage("_img_ui/hint_confirm.png");
 		
 		setup();
 

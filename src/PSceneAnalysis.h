@@ -17,7 +17,7 @@ public:
 
 		_timer_hint=FrameTimer(3000);
 
-		_img_hint.loadImage("ui_img/hint_analysis.png");
+		_img_hint.loadImage("_img_ui/hint_analysis.png");
 
 		setup();
 

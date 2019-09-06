@@ -39,6 +39,9 @@ void ofApp::setup(){
 	_recorder.startThread();
 
 	ofEnableSmoothing();
+
+
+	_fruit_rain.start();
 }
 
 //--------------------------------------------------------------
@@ -57,7 +60,7 @@ void ofApp::update(){
 		if(_recording && ofGetFrameNum()%10==0) saveCameraFrame();
 	}
 
-	
+	_fruit_rain.update(dt_);
 
 	_scene[_stage]->update(dt_);
 }
@@ -70,8 +73,13 @@ void ofApp::draw(){
 
 	ofPushMatrix();
 	ofTranslate(420,0);
+		
+		_fruit_rain.draw();
+
 		_img_frame.draw(0,0);
 		_scene[_stage]->draw();			
+
+
 	ofPopMatrix();
 
 #ifdef DRAW_DEBUG
@@ -119,13 +127,16 @@ void ofApp::loadScene(){
 	_scene[4]=new PSceneResult(this);
 
 
-	_img_frame.loadImage("ui_img/frame_sleep.png");
-	_img_mask.loadImage("ui_img/mask-08.png");
-	_img_share.loadImage("ui_img/frame_share.png");
+	_img_frame.loadImage("_img_ui/frame_sleep.png");
+	_img_mask.loadImage("_img_ui/mask-08.png");
+	_img_share.loadImage("_img_ui/frame_share.png");
 
 	for(int i=1;i<=5;++i){
-		_img_number[i-1].loadImage("ui_img/number-"+ofToString(i)+".png");
+		_img_number[i-1].loadImage("_img_ui/number-"+ofToString(i)+".png");
 	}
+
+	
+
 }
 
 void ofApp::onSceneInFinish(int &e){
@@ -326,6 +337,7 @@ void ofApp::saveCameraFrame(){
 	_fbo_save.begin();
 	ofClear(255);
 		_camera.draw(_fbo_save.getWidth()/2-_camera.getWidth()/2,_fbo_save.getHeight()/2-_camera.getHeight()/2);
+		_fruit_rain.draw();
 		_img_share.draw(0,0);
 	_fbo_save.end();
 

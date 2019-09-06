@@ -24,8 +24,8 @@ public:
 
 		_timer_hint=FrameTimer(3000);
 
-		_img_hint.loadImage("ui_img/hint_sleep.png");
-		_img_text.loadImage("ui_img/text_sleep.png");
+		_img_hint.loadImage("_img_ui/hint_sleep.png");
+		_img_text.loadImage("_img_ui/text_sleep.png");
 
 		_glow=PGlowLine(540,540,420,420,60);
 

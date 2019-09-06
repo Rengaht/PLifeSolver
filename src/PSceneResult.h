@@ -19,10 +19,10 @@ public:
 
 		_timer_scan=FrameTimer(QRCODE_TIME);
 
-		_img_card[0].loadImage("ui_img/question_result.png");
-		_img_card[1].loadImage("ui_img/solution_result.png");
-		_img_card[2].loadImage("ui_img/takeaway_result.png");
-		_img_card[3].loadImage("ui_img/qrcode_result.png");
+		_img_card[0].loadImage("_img_ui/question_result.png");
+		_img_card[1].loadImage("_img_ui/solution_result.png");
+		_img_card[2].loadImage("_img_ui/takeaway_result.png");
+		_img_card[3].loadImage("_img_ui/qrcode_result.png");
 		
 		setup();
 

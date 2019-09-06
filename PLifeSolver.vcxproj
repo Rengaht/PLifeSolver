@@ -196,6 +196,7 @@
     <ClInclude Include="src\ofApp.h" />
     <ClInclude Include="src\FrameTimer.h" />
     <ClInclude Include="src\ofxImageSequenceRecorder.h" />
+    <ClInclude Include="src\PFruitRain.h" />
     <ClInclude Include="src\PGlowLine.h" />
     <ClInclude Include="src\PSceneAnalysis.h" />
     <ClInclude Include="src\PSceneAuth.h" />

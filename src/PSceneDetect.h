@@ -22,8 +22,8 @@ public:
 		_timer_count=FrameTimer(1000);
 
 
-		_img_text.loadImage("ui_img/text_detect.png");
-		_img_hint.loadImage("ui_img/hint_detect.png");
+		_img_text.loadImage("_img_ui/text_detect.png");
+		_img_hint.loadImage("_img_ui/hint_detect.png");
 
 		setup();
 
