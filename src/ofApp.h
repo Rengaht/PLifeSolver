@@ -7,6 +7,8 @@
 #define SCREEN_WIDTH 1920
 #define SCREEN_HEIGHT 1080
 
+#define WIN_HEIGHT 1080
+
 #define FRUIT_COUNT 18
 
 #include "ofMain.h"

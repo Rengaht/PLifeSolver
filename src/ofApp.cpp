@@ -6,6 +6,12 @@
 #include "PSceneResult.h"
 
 
+ofPath PDrop::_shape_drop;
+ofVec2f PDrop::_size;
+
+ofColor PFruitRain::_color[]={ofColor(236,152,152),ofColor(238,216,152),ofColor(152,236,200),ofColor(152,177,236),
+						ofColor(219,152,236),ofColor(238,216,152),ofColor(152,236,200),ofColor(152,177,236)};
+
 //--------------------------------------------------------------
 void ofApp::setup(){
 	ofSetVerticalSync(true);
@@ -17,8 +23,11 @@ void ofApp::setup(){
 	setupCamera();
 
 	_stage_pre=PEMPTY;
+	//setStage(PSLEEP);
 	_stage=PSLEEP;
 	_scene[_stage]->init();
+	
+
 
 	ofAddListener(SceneBase::sceneInFinish,this,&ofApp::onSceneInFinish);
 	ofAddListener(SceneBase::sceneOutFinish,this,&ofApp::onSceneOutFinish);
@@ -41,7 +50,6 @@ void ofApp::setup(){
 	ofEnableSmoothing();
 
 
-	_fruit_rain.start();
 }
 
 //--------------------------------------------------------------
@@ -68,19 +76,18 @@ void ofApp::update(){
 //--------------------------------------------------------------
 void ofApp::draw(){
 
-	_camera.draw(0,0);
-	_img_mask.draw(0,0);
+	_camera.draw(CAM_WIDTH,0,-CAM_WIDTH,CAM_HEIGHT);
+	//_img_mask.draw(0,0);
 
 	ofPushMatrix();
-	ofTranslate(420,0);
+	ofTranslate(ofGetWidth()/2-WIN_HEIGHT/2,0);
 		
-		_fruit_rain.draw();
-
-		_img_frame.draw(0,0);
+		if(_stage==PDETECT || _stage==PANALYSIS) _fruit_rain.draw();		
 		_scene[_stage]->draw();			
 
 
 	ofPopMatrix();
+	_img_frame.draw(0,0);
 
 #ifdef DRAW_DEBUG
 	ofPushStyle();
@@ -127,8 +134,8 @@ void ofApp::loadScene(){
 	_scene[4]=new PSceneResult(this);
 
 
-	_img_frame.loadImage("_img_ui/frame_sleep.png");
-	_img_mask.loadImage("_img_ui/mask-08.png");
+	_img_frame.loadImage("_img_ui/mask.png");
+	//_img_mask.loadImage("_img_ui/mask-08.png");
 	_img_share.loadImage("_img_ui/frame_share.png");
 
 	for(int i=1;i<=5;++i){
@@ -165,7 +172,15 @@ void ofApp::setStage(PStage set_){
 	switch(set_){
 		case PDETECT:
 			createUserID();
+			_fruit_rain.reset();
+			_fruit_rain.start();
 			break;
+        case PANALYSIS:
+            _fruit_rain.setSlow(false);
+            break;
+        case PRESULT:
+            _fruit_rain.stop();
+            break;
 	}
 
 	_stage=set_;
@@ -173,7 +188,7 @@ void ofApp::setStage(PStage set_){
 
 
 void ofApp::setupCamera(){
-	_camera.setup(CAM_WIDTH,CAM_HEIGHT);
+	_camera.setup(CAM_WIDTH,CAM_HEIGHT);	
 	_finder.setup("haarcascade_frontalface_default.xml");
 	_finder.setPreset(ObjectFinder::Fast);
 
@@ -324,6 +339,7 @@ void ofApp::setRecord(bool set_){
 	if(set_){
 		_idx_record=0;
 		_recorder.setPrefix(ofToDataPath("tmp/"+_user_id+"_"));
+		_recorder.setUserID(_user_id);
 		
 		//_recorder.startThread();
 		ofSystem("DEL /F/Q "+ofToDataPath("tmp\\")+"*.png");

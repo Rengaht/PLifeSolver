@@ -40,10 +40,10 @@ public:
 					_ptr_app->_img_number[(int)ofClamp(4-_num_count,0,4)].draw(492,613,96,134);					
 				ofPopStyle();
 
-				_img_text.draw(0,0);
+				_img_text.draw(0,0,WIN_HEIGHT,WIN_HEIGHT);
 				break;
 			case 1:
-				_img_hint.draw(0,0);
+				_img_hint.draw(0,0,WIN_HEIGHT,WIN_HEIGHT);
 				_glow.draw(getLayerAlpha(1));
 				break;
 		}

@@ -16,6 +16,8 @@ public:
     string prefix;
     string format;
     int numberWidth;
+	
+	string _user_id;
 
 	ofEvent<int> recordFinish;
 	int _save_count;
@@ -41,6 +43,9 @@ public:
     void setNumberWidth(int nbwidth){
         numberWidth = nbwidth;
     }
+	void setUserID(string set_){
+		_user_id=set_;
+	}
        
     void threadedFunction() {    
         while(isThreadRunning()) {

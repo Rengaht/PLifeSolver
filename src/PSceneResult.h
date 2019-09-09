@@ -11,6 +11,9 @@
 class PSceneResult:public SceneBase{
 
 	FrameTimer _timer_scan;
+	FrameTimer _timer_count;
+	int _num_count;
+
 	ofImage _img_card[4];
 public:
 	PSceneResult(ofApp* set_):SceneBase(set_){
@@ -18,6 +21,7 @@ public:
 		_order_scene=4;
 
 		_timer_scan=FrameTimer(QRCODE_TIME);
+		_timer_count=FrameTimer(1000);
 
 		_img_card[0].loadImage("_img_ui/question_result.png");
 		_img_card[1].loadImage("_img_ui/solution_result.png");
@@ -28,14 +32,22 @@ public:
 
 		ofAddListener(_timer_in[3].finish_event,this,&PSceneResult::onTimerSceneInFinish);
 		ofAddListener(_timer_scan.finish_event,this,&PSceneResult::onTimerScanFinish);
-
+		ofAddListener(_timer_count.finish_event,this,&PSceneResult::onTimerCountFinish);
 		
 	}
 	void drawLayer(int i){
 		switch(i){
 			case 0:
 			case 1:
+                _img_card[i].draw(0,0);
+                break;
 			case 2:
+                _img_card[i].draw(0,0);
+                ofPushStyle();
+                ofSetColor(238,216,152,255*ofClamp(1.0-_timer_count.val(),0,1)*getLayerAlpha(0));
+                    ofDrawBitmapString(ofToString(ofClamp(QRCODE_TIME/1000-_num_count,0,QRCODE_TIME/1000)),300,832);
+                ofPopStyle();
+                break;
 			case 3:
 				_img_card[i].draw(0,0);
 				break;
@@ -58,6 +70,10 @@ public:
 	void onTimerScanFinish(int &e){
 		_ptr_app->prepareScene(ofApp::PSLEEP);
 	}
+	 void onTimerCountFinish(int &e){
+        _num_count++;
+        _timer_count.restart();
+    }
 };
 
 

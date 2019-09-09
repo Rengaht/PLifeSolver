@@ -12,6 +12,7 @@ class PSceneSleep:public SceneBase{
 	FrameTimer _timer_hint;
 	ofImage _img_hint;
 	ofImage _img_text;
+	ofImage _img_face;
 	
 	int _index_face_start;
 
@@ -26,6 +27,7 @@ public:
 
 		_img_hint.loadImage("_img_ui/hint_sleep.png");
 		_img_text.loadImage("_img_ui/text_sleep.png");
+		_img_face.loadImage("_img_ui/face_sleep.png");
 
 		_glow=PGlowLine(540,540,420,420,60);
 
@@ -34,11 +36,12 @@ public:
 	void drawLayer(int i){
 		switch(i){
 			case 0:
-				_img_text.draw(0,0);
+				_img_text.draw(0,0,WIN_HEIGHT,WIN_HEIGHT);
 				_glow.draw(getLayerAlpha(0));
 				break;
 			case 1:
-				_img_hint.draw(0,0);
+				_img_hint.draw(0,0,WIN_HEIGHT,WIN_HEIGHT);
+				_img_face.draw(0,0,WIN_HEIGHT,WIN_HEIGHT);
 				break;
 		}
 

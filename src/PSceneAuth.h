@@ -45,7 +45,7 @@ public:
 				ofPushStyle();
 				ofSetColor(255,255*ofClamp(1.0-_timer_hint.val(),0,1)*getLayerAlpha(0));
 					_ptr_app->_img_number[(int)ofClamp(2-_num_timer,0,2)].draw(373,771,53,74);
-					_img_text.draw(0,0);				
+					_img_text.draw(0,0,WIN_HEIGHT,WIN_HEIGHT);				
 				ofPopStyle();
 
 				break;
@@ -53,9 +53,9 @@ public:
 				ofPushStyle();
 								
 				ofSetColor(255,255*ofClamp(1.0-3*_timer_confirm.val(),0,1)*getLayerAlpha(1));
-					_img_hint.draw(0,0);
+					_img_hint.draw(0,0,WIN_HEIGHT,WIN_HEIGHT);
 				ofSetColor(255,255*ofClamp(3*(_timer_confirm.val()-.33),0,1)*getLayerAlpha(1));
-					_img_confirm.draw(0,0);				
+					_img_confirm.draw(0,0,WIN_HEIGHT,WIN_HEIGHT);				
 				
 				ofPopStyle();
 				

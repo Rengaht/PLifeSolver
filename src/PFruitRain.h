@@ -7,13 +7,17 @@
 #define FRUIT_VEL 3
 #define FRUIT_ACC 0.01
 #define FRUIT_DENSITY 8
-#define FRUIT_SCALE .25
+#define FRUIT_SCALE 1
 
-#define FRUIT_RAIN_INTERVAL 500
-#define FRUIT_GROUP_INTERVAL 3000
+#define FRUIT_RAIN_INTERVAL 600
+#define FRUIT_GROUP_INTERVAL 5000
 
 #include "ofMain.h"
 #include "FrameTimer.h"
+#include "PJuice.h"
+
+
+
 
 class PFruit{
 
@@ -63,13 +67,16 @@ class PFruitRain{
 	FrameTimer _timer_rain,_timer_group;
 	list<PFruit> _fruit;
 
+	PJuice _juice;
+
 public:
-	
+	static ofColor _color[];
 	list<int> _idx_fruit[FRUIT_GROUP];
 	list<ofImage> _img_fruit[FRUIT_GROUP];
 	
 	int _idx_group;
 	bool _playing;
+	bool _slow;
 
 	PFruitRain(){
 		
@@ -86,32 +93,52 @@ public:
 		
 	}
 	void loadImage(){
-		_idx_fruit[0]=list<int>({5,6,15});
+		/*_idx_fruit[0]=list<int>({5,6,15});
 		_idx_fruit[1]=list<int>({8,16});
 		_idx_fruit[2]=list<int>({10,11});
 		_idx_fruit[3]=list<int>({18});
 		_idx_fruit[4]=list<int>({2,9,17});
 		_idx_fruit[5]=list<int>({1,3,4});
 		_idx_fruit[6]=list<int>({7,12});
-		_idx_fruit[7]=list<int>({1,2,3,4});
-	
+		_idx_fruit[7]=list<int>({1,2,3,4});*/
+		
+		_idx_fruit[0]=list<int>({1});
+		_idx_fruit[1]=list<int>({9,10});
+		_idx_fruit[2]=list<int>({3});
+		_idx_fruit[3]=list<int>({4});
+		_idx_fruit[4]=list<int>({5});
+		_idx_fruit[5]=list<int>({6});
+		_idx_fruit[6]=list<int>({7});
+		_idx_fruit[7]=list<int>({8});
 
 		for(int i=0;i<FRUIT_GROUP;++i){
 			for(auto &t:_idx_fruit[i]){
-				_img_fruit[i].push_back(ofImage("_img_fruit/"+ofToString(t)+".png"));
+				_img_fruit[i].push_back(ofImage("_img_fruit/j"+ofToString(t)+".png"));
 			}
 		}
+
+		ofxSVG svg_;
+		svg_.load("_img_ui/drop.svg");		
+		PDrop::_shape_drop.append(svg_.getPathAt(0));
+		PDrop::_shape_drop.setUseShapeColor(false);
+		PDrop::_shape_drop.setFilled(true);
+
+		PDrop::_size=ofVec2f(svg_.getWidth(),svg_.getHeight());
 	}
 	void reset(){
 		_idx_group=0;
+		
 		_fruit.clear();		
+		_juice.reset();
+
+        setSlow(true);
 	}
 	void start(){
 		_timer_rain.restart();
 		_timer_group.restart();
 		_playing=true;
 	}
-	void end(){
+	void stop(){
 		_timer_rain.stop();
 		_timer_group.stop();
 		_playing=false;
@@ -146,30 +173,39 @@ public:
 		_fruit.erase(remove_if(_fruit.begin(),_fruit.end(),
 								[&](PFruit p)->bool {return p.isDead();}),_fruit.end());
 
-
+		_juice.update(dt_);
 		_timer_rain.update(dt_);
 		
 		_timer_group.update(dt_);
 		if(_timer_group.val()==1){
 			(++_idx_group)%=FRUIT_GROUP;
 			_timer_group.restart();
+
+			if(!_slow){
+				_juice.addWave(ofColor(ofRandom(255),ofRandom(255),ofRandom(255),200));
+			}
 		}
 
 
 		
 	}
 	
-	bool isDead(PFruit t){
-		return t.isDead();
-	}
 
 	void draw(){
+		
 		for(auto& f:_fruit) f.draw();
+		if(!_slow) _juice.draw();
 	}
 	void onRainFinish(int &e){
 		addNewFruit();
 	}
-
+	void setSlow(bool set_){
+        _slow=set_;
+        if(set_){
+            _timer_rain.setDue(FRUIT_RAIN_INTERVAL*2);
+			_juice.addWave(ofColor(_color[_idx_group],120));
+        }else _timer_rain.setDue(FRUIT_RAIN_INTERVAL);
+    }
 };
 
 
