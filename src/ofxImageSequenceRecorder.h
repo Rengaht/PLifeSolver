@@ -18,6 +18,7 @@ public:
     int numberWidth;
 	
 	string _user_id;
+	int _juice_id;
 
 	ofEvent<int> recordFinish;
 	int _save_count;
@@ -46,6 +47,9 @@ public:
 	void setUserID(string set_){
 		_user_id=set_;
 	}
+	void setJuiceID(int set_){
+		_juice_id=set_;
+	}
        
     void threadedFunction() {    
         while(isThreadRunning()) {
@@ -61,10 +65,17 @@ public:
 					_save_count=0;
 					//stopThread();
 					string cmd="\"C:\\Program Files\\ImageMagick-7.0.8-Q16\\magick.exe\" "+ofToDataPath("tmp/")+"*.png "
-							+"-reverse "+ofToDataPath("tmp/")+"*.png -loop 0 -resize 800x800 "
+							+"-reverse "+ofToDataPath("tmp/")+"*.png -loop 0 "
 							+ofToDataPath("output/")+_user_id+".gif";
-					ofLog()<<cmd;
+					//ofLog()<<cmd;
 					ofSystem(cmd);
+
+					string cmd2="\"C:\\Program Files\\ImageMagick-7.0.8-Q16\\magick.exe\" convert "+ofToDataPath("output/")+_user_id+".gif"
+								+" -coalesce null: "+ofToDataPath("_img_ui/share/")+ofToString(_juice_id+1)+".png"
+								+" -gravity center -layers composite -layers optimize "
+								+ofToDataPath("output/")+_user_id+".gif";
+					ofLog()<<cmd2;
+					ofSystem(cmd2);
 
 					ofNotifyEvent(recordFinish,counter,this);
 				}

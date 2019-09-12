@@ -65,7 +65,7 @@ void ofApp::update(){
 			_finder.update(_camera);
 		}		
 
-		if(_recording && ofGetFrameNum()%10==0) saveCameraFrame();
+		if(_recording && ofGetFrameNum()%RECORD_FPS==0) saveCameraFrame();
 	}
 
 	_fruit_rain.update(dt_);
@@ -80,14 +80,15 @@ void ofApp::draw(){
 	//_img_mask.draw(0,0);
 
 	ofPushMatrix();
-	ofTranslate(ofGetWidth()/2-WIN_HEIGHT/2,0);
+	ofTranslate(ofGetWidth()/2-ofGetHeight()/2,0);
+	ofScale(ofGetHeight()/1080.0,ofGetHeight()/1080.0);
 		
 		if(_stage==PDETECT || _stage==PANALYSIS) _fruit_rain.draw();		
 		_scene[_stage]->draw();			
 
 
 	ofPopMatrix();
-	_img_frame.draw(0,0);
+	_img_frame.draw(0,0,ofGetWidth(),ofGetHeight());
 
 #ifdef DRAW_DEBUG
 	ofPushStyle();
@@ -136,8 +137,10 @@ void ofApp::loadScene(){
 
 	_img_frame.loadImage("_img_ui/mask.png");
 	//_img_mask.loadImage("_img_ui/mask-08.png");
-	_img_share.loadImage("_img_ui/frame_share.png");
+	_img_share_frame.loadImage("_img_ui/frame_share.png");
 
+	for(int i=0;i<MJUICE_RESULT;++i)
+		_img_share_text[i].load("_img_ui/share/"+ofToString(i+1)+".png");
 	
 	
 
@@ -262,7 +265,7 @@ void ofApp::urlResponse(ofxHttpResponse &resp_){
         if(_stage==PANALYSIS){
             int event=_stage;
 			ofNotifyEvent(_event_recieve_emotion,event);
-			prepareScene(PRESULT);
+			//prepareScene(PRESULT);
         }
        
              
@@ -282,6 +285,7 @@ void ofApp::parseFaceData(string data_){
 			_rect_face.push_back(rect_);
 
             _idx_user_juice=getJuiceFromEmotion(json_[i]["faceAttributes"]["emotion"]);
+			_recorder.setJuiceID(_idx_user_juice);
 
 		}
         _user_data["face"]=json_;
@@ -351,7 +355,8 @@ void ofApp::saveCameraFrame(){
 	ofClear(255);
 		_camera.draw(_fbo_save.getWidth()/2-_camera.getWidth()/2,_fbo_save.getHeight()/2-_camera.getHeight()/2);
 		_fruit_rain.draw();
-		_img_share.draw(0,0);
+		_img_share_frame.draw(0,0,_fbo_save.getWidth(),_fbo_save.getHeight());
+		//_img_share_text[_idx_user_juice].draw(0,0,_fbo_save.getWidth(),_fbo_save.getHeight());
 	_fbo_save.end();
 
 	ofPixels pix;
@@ -363,7 +368,7 @@ void ofApp::saveCameraFrame(){
 void ofApp::onRecorderFinish(int &e){
 	ofLog()<<"Recorder finish!!!";
 
-	
+	prepareScene(PRESULT);
 	//string cmd="\"C:\\Program Files\\ImageMagick-7.0.8-Q16\\magick.exe\" "+ofToDataPath("tmp/")+"*.png "
 	//			+"-reverse "+ofToDataPath("tmp/")+"*.png -loop 0 -resize 800x800 "
 	//			+ofToDataPath("output/")+_user_id+".gif";

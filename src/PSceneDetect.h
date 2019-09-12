@@ -3,6 +3,7 @@
 #define PSCENE_DETECT_H
 
 #define MDETECT_COUNT 5
+#define RECORD_TIME_START 2
 #include "PSceneBase.h"
 
 
@@ -30,7 +31,7 @@ public:
 		_img_hint.loadImage("_img_ui/hint_detect.png");
 
 		for(int i=1;i<=MDETECT_COUNT;++i){
-			_img_number[i-1].loadImage("_img_ui/count/"+ofToString(i)+".png");
+			_img_number[i-1].loadImage("_img_ui/detect_count/"+ofToString(i)+".png");
 		}
 
 		setup();
@@ -74,7 +75,7 @@ public:
 		_num_count++;
 		if(_num_count<5){
 			_timer_count.restart();
-			if(_num_count==3) _ptr_app->setRecord(true);
+			if(_num_count==RECORD_TIME_START) _ptr_app->setRecord(true);
 		}else{
 			_ptr_app->setRecord(false);
 			_ptr_app->prepareScene(ofApp::PANALYSIS);			

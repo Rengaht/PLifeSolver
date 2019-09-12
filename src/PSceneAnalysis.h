@@ -29,7 +29,7 @@ public:
 		ofAddListener(_timer_hint.finish_event,this,&PSceneAnalysis::onTimerHintFinish);
 
 		_glow=PGlowLine(540,915,200,150,30);
-
+		_timer_sleep=FrameTimer(60000);
 
 	}
 	void drawLayer(int i){

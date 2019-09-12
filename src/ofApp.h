@@ -11,7 +11,7 @@
 
 #define FRUIT_COUNT 18
 #define MJUICE_RESULT 8
-
+#define RECORD_FPS 15
 
 #include "ofMain.h"
 
@@ -103,7 +103,7 @@ class ofApp : public ofBaseApp{
 		void setStage(PStage set_);
 
 		
-		ofImage _img_share;
+		ofImage _img_share_frame,_img_share_text[MJUICE_RESULT];
 		ofFbo _fbo_save;
 		ofxImageSequenceRecorder _recorder;    
 		void saveCameraFrame();
