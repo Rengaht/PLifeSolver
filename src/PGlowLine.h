@@ -118,6 +118,13 @@ public:
 		if(val_<.66) return 0;
 		return (val_-.66)*3;
 	}
+	void setWidth(float set_){
+		_size.x=set_;
+	}
+	void restart(){
+		_timer.restart();
+		_timer2.restart();
+	}
 	
 };
 

@@ -113,11 +113,11 @@ void SceneBase::update(float dt_){
 		break;
 	case Due:
 		_timer_sleep.update(dt_);
-		if(_order_scene!=0 && _timer_sleep.finish()){
+		/*if(_order_scene!=0 && _timer_sleep.finish()){
 			ofLog()<<"Back to sleep...";
 			_ptr_app->prepareScene(ofApp::PStage::PSLEEP);
 			_timer_sleep.reset();
-		}
+		}*/
 		break;
 	case End:
 		for(int i=0;i<_mlayer;++i){

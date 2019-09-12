@@ -29,7 +29,7 @@ public:
 		ofAddListener(_timer_hint.finish_event,this,&PSceneAnalysis::onTimerHintFinish);
 
 		_glow=PGlowLine(540,915,200,150,30);
-		_timer_sleep=FrameTimer(60000);
+		_timer_sleep=FrameTimer(SLEEP_TIME*3);
 
 	}
 	void drawLayer(int i){
@@ -61,9 +61,14 @@ public:
 	}
 	void onTimerHintFinish(int &e){
 		
-		(++_idx_hint)%=NUM_HINT_ANALYSIS;
-		ofLog()<<ofToString(_idx_hint);
+		(++_idx_hint)%=NUM_HINT_ANALYSIS;		
 		_timer_hint.restart();
+
+		if(_idx_hint==2) _glow.setWidth(260);
+		else if(_idx_hint>2) _glow.setWidth(220);
+		else _glow.setWidth(150);
+
+		//_glow.restart();
 	}
 };
 
