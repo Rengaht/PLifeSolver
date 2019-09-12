@@ -3,7 +3,7 @@
 #define PSCENE_ANALYSIS_H
 
 #include "PSceneBase.h"
-#define NUM_HINT_ANALYSIS 2
+#define NUM_HINT_ANALYSIS 5
 
 class PSceneAnalysis:public SceneBase{
 
@@ -20,9 +20,9 @@ public:
 
 		_timer_hint=FrameTimer(2000);
 
-		_img_hint[0].loadImage("_img_ui/hint_analysis.png");
-		_img_hint[1].loadImage("_img_ui/hint_analysis-2.png");
-
+		for(int i=0;i<5;++i)
+			_img_hint[i].loadImage("_img_ui/hint_analysis-"+ofToString(i+1)+".png");
+		
 		setup();
 
 		ofAddListener(_timer_in[0].finish_event,this,&PSceneAnalysis::onSceneInFinish);
@@ -57,7 +57,7 @@ public:
 		_timer_hint.restart();
 	}
 	void onSceneInFinish(int &e){
-		//_ptr_app->sendFaceRequest();
+		_ptr_app->sendFaceRequest();
 	}
 	void onTimerHintFinish(int &e){
 		

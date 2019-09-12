@@ -2,6 +2,8 @@
 #ifndef PSCENE_AUTH_H
 #define PSCENE_AUTH_H
 
+#define MAUTH_COUNT 3
+
 #include "PSceneBase.h"
 
 class PSceneAuth:public SceneBase{
@@ -12,7 +14,7 @@ class PSceneAuth:public SceneBase{
 	int _num_timer;
 
 	ofImage _img_hint;
-	ofImage _img_text;
+	ofImage _img_text[MAUTH_COUNT];
 	ofImage _img_confirm;
 
 	PGlowLine _glow;
@@ -26,7 +28,10 @@ public:
 		_timer_confirm=FrameTimer(3000);
 
 		_img_hint.loadImage("_img_ui/hint_auth.png");
-		_img_text.loadImage("_img_ui/text_auth.png");
+		
+		for(int i=0;i<MAUTH_COUNT;++i)
+			_img_text[i].loadImage("_img_ui/text_auth/"+ofToString(i+1)+".png");
+
 		_img_confirm.loadImage("_img_ui/hint_confirm.png");
 		
 		setup();
@@ -44,8 +49,8 @@ public:
 				// countdown
 				ofPushStyle();
 				ofSetColor(255,255*ofClamp(1.0-_timer_hint.val(),0,1)*getLayerAlpha(0));
-					_ptr_app->_img_number[(int)ofClamp(2-_num_timer,0,2)].draw(373,771,53,74);
-					_img_text.draw(0,0,WIN_HEIGHT,WIN_HEIGHT);				
+					//_ptr_app->_img_number[(int)ofClamp(2-_num_timer,0,2)].draw(373,771,53,74);
+					_img_text[(int)ofClamp(MAUTH_COUNT-1-_num_timer,0,MAUTH_COUNT-1)].draw(0,0,WIN_HEIGHT,WIN_HEIGHT);				
 				ofPopStyle();
 
 				break;
@@ -86,7 +91,6 @@ public:
 		_num_timer++;
 		if(_num_timer<3) _timer_hint.restart();		
 		else{
-			_timer_out[0].restart();
 			_timer_confirm.restart();
 		}
 	}
@@ -94,12 +98,12 @@ public:
 		_ptr_app->prepareScene(ofApp::PDETECT);
 	}
 
-	void end(){
+	/*void end(){
 		ofLog()<<"Scene "<<_order_scene<<" end!";
     
 		_timer_out[1].restart();
 		_status=SceneStatus::End;
-	}
+	}*/
 };
 
 

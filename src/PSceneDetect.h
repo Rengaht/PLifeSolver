@@ -2,6 +2,7 @@
 #ifndef PSCENE_DETECT_H
 #define PSCENE_DETECT_H
 
+#define MDETECT_COUNT 5
 #include "PSceneBase.h"
 
 
@@ -14,6 +15,9 @@ class PSceneDetect:public SceneBase{
 	ofImage _img_text;
 
 	PGlowLine _glow;
+
+	ofImage _img_number[5];
+
 public:
 	PSceneDetect(ofApp* set_):SceneBase(set_){
 		_mlayer=2;
@@ -24,6 +28,10 @@ public:
 
 		_img_text.loadImage("_img_ui/text_detect.png");
 		_img_hint.loadImage("_img_ui/hint_detect.png");
+
+		for(int i=1;i<=MDETECT_COUNT;++i){
+			_img_number[i-1].loadImage("_img_ui/count/"+ofToString(i)+".png");
+		}
 
 		setup();
 
@@ -37,7 +45,7 @@ public:
 			case 0:
 				ofPushStyle();
 				ofSetColor(255,255*ofClamp(1.0-_timer_count.val(),0,1)*getLayerAlpha(0));
-					_ptr_app->_img_number[(int)ofClamp(4-_num_count,0,4)].draw(492,613,96,134);					
+					_img_number[(int)ofClamp(MDETECT_COUNT-1-_num_count,0,MDETECT_COUNT-1)].draw(0,0,WIN_HEIGHT,WIN_HEIGHT);					
 				ofPopStyle();
 
 				_img_text.draw(0,0,WIN_HEIGHT,WIN_HEIGHT);

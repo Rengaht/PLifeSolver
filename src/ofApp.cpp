@@ -138,10 +138,7 @@ void ofApp::loadScene(){
 	//_img_mask.loadImage("_img_ui/mask-08.png");
 	_img_share.loadImage("_img_ui/frame_share.png");
 
-	for(int i=1;i<=5;++i){
-		_img_number[i-1].loadImage("_img_ui/number-"+ofToString(i)+".png");
-	}
-
+	
 	
 
 }
@@ -284,7 +281,7 @@ void ofApp::parseFaceData(string data_){
 								json_[i]["faceRectangle"]["height"].asInt());
 			_rect_face.push_back(rect_);
 
-            int idx_=getJuiceFromEmotion(json_[i]["faceAttributes"]["emotion"]);
+            _idx_user_juice=getJuiceFromEmotion(json_[i]["faceAttributes"]["emotion"]);
 
 		}
         _user_data["face"]=json_;

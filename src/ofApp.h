@@ -10,6 +10,8 @@
 #define WIN_HEIGHT 1080
 
 #define FRUIT_COUNT 18
+#define MJUICE_RESULT 8
+
 
 #include "ofMain.h"
 
@@ -65,9 +67,11 @@ class ofApp : public ofBaseApp{
 		ofxJSONElement _user_data;
 
 		string _user_id;
+		int _idx_user_juice;
+
 		void createUserID();
 
-		ofImage _img_number[5];
+		
 
 		bool _recording;
 		int _idx_record;

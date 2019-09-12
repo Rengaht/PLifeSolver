@@ -5,6 +5,7 @@
 #define CARD_TIME 5000
 #define QRCODE_TIME 10000
 
+
 #include "PSceneBase.h"
 
 
@@ -14,7 +15,9 @@ class PSceneResult:public SceneBase{
 	FrameTimer _timer_count;
 	int _num_count;
 
-	ofImage _img_card[4];
+	ofImage _img_question[MJUICE_RESULT],_img_solution[MJUICE_RESULT];
+	ofImage _img_qrcode,_img_takeaway;
+
 public:
 	PSceneResult(ofApp* set_):SceneBase(set_){
 		_mlayer=4;
@@ -23,10 +26,12 @@ public:
 		_timer_scan=FrameTimer(QRCODE_TIME);
 		_timer_count=FrameTimer(1000);
 
-		_img_card[0].loadImage("_img_ui/question_result.png");
-		_img_card[1].loadImage("_img_ui/solution_result.png");
-		_img_card[2].loadImage("_img_ui/takeaway_result.png");
-		_img_card[3].loadImage("_img_ui/qrcode_result.png");
+		for(int i=0;i<MJUICE_RESULT;++i){
+			_img_question[i].loadImage("_img_ui/question/"+ofToString(i+1)+".png");
+			_img_solution[i].loadImage("_img_ui/solution/"+ofToString(i+1)+".png");
+		}
+		_img_takeaway.loadImage("_img_ui/takeaway_result.png");
+		_img_qrcode.loadImage("_img_ui/qrcode_result.png");
 		
 		setup();
 
@@ -38,18 +43,20 @@ public:
 	void drawLayer(int i){
 		switch(i){
 			case 0:
+				_img_question[_ptr_app->_idx_user_juice].draw(0,0);
+                break;
 			case 1:
-                _img_card[i].draw(0,0);
+                _img_solution[_ptr_app->_idx_user_juice].draw(0,0);
                 break;
 			case 2:
-                _img_card[i].draw(0,0);
+                _img_takeaway.draw(0,0);
                 ofPushStyle();
                 ofSetColor(238,216,152,255*ofClamp(1.0-_timer_count.val(),0,1)*getLayerAlpha(0));
                     ofDrawBitmapString(ofToString(ofClamp(QRCODE_TIME/1000-_num_count,0,QRCODE_TIME/1000)),300,832);
                 ofPopStyle();
                 break;
 			case 3:
-				_img_card[i].draw(0,0);
+				_img_qrcode.draw(0,0);
 				break;
 		}
 
@@ -57,15 +64,20 @@ public:
 	void update(float dt_){
 		SceneBase::update(dt_);		
 		_timer_scan.update(dt_);
+		_timer_count.update(dt_);
 	}
 
 	void init(){
 		SceneBase::init();
 		_timer_scan.reset();
+
+		_timer_count.reset();
+		_num_count=0;
 	}
 
 	void onTimerSceneInFinish(int &e){
 		_timer_scan.restart();
+		_timer_count.restart();
 	}
 	void onTimerScanFinish(int &e){
 		_ptr_app->prepareScene(ofApp::PSLEEP);

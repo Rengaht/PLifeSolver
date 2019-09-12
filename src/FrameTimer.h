@@ -115,10 +115,12 @@ public:
 	float valFade(){
 
 		float p=val();
-		p/=0.5;
+		float seg=3;
+		p*=seg;
 
 		if(p<1) return valEaseInOut(p);
-		else return 1.0-valEaseInOut(p-1);
+		else if(p<seg-1) return 1;
+		else return 1.0-valEaseInOut(p-(seg-1));
 
 	}
 	bool isStart(){
