@@ -11,9 +11,10 @@
 
 #define FRUIT_COUNT 18
 #define MJUICE_RESULT 8
-#define RECORD_FPS 15
 
+#define GIF_FPS 15
 #define GIF_HEIGHT 700
+#define GIF_LENGTH 2
 
 #include "ofMain.h"
 
@@ -85,6 +86,9 @@ class ofApp : public ofBaseApp{
 		void setRecord(bool set_);
 
 		/* share */
+		bool _face_analysis_ready;
+		
+		void createShareImage();
 		void uploadImage(string id_);
 		void createQRcode(string url_);
 		ofxQRCodeGenerator _qrcode_gen;
@@ -123,4 +127,6 @@ class ofApp : public ofBaseApp{
 
 		PFruitRain _fruit_rain;
 		
+
+		void createFruitImage();
 };

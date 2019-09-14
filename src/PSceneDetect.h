@@ -77,7 +77,7 @@ public:
 			_timer_count.restart();
 			if(_num_count==RECORD_TIME_START) _ptr_app->setRecord(true);
 		}else{
-			_ptr_app->setRecord(false);
+			//_ptr_app->setRecord(false);
 			_ptr_app->prepareScene(ofApp::PANALYSIS);			
 		}
 	}

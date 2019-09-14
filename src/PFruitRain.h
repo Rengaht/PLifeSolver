@@ -77,6 +77,7 @@ public:
 	int _idx_group;
 	bool _playing;
 	bool _slow;
+	bool _auto_fruit;
 
 	PFruitRain(){
 		
@@ -85,8 +86,8 @@ public:
 		reset();
 		addNewFruit();
 		_timer_rain=FrameTimer(FRUIT_RAIN_INTERVAL);
-		_timer_rain.setContinuous(true);
-		ofAddListener(_timer_rain.finish_event,this,&PFruitRain::onRainFinish);
+		//_timer_rain.setContinuous(true);
+		//ofAddListener(_timer_rain.finish_event,this,&PFruitRain::onRainFinish);
 
 
 		_timer_group=FrameTimer(FRUIT_GROUP_INTERVAL);
@@ -132,6 +133,7 @@ public:
 		_juice.reset();
 
         setSlow(true);
+		setAutoFruit(true);
 	}
 	void start(){
 		_timer_rain.restart();
@@ -175,17 +177,23 @@ public:
 
 		_juice.update(dt_);
 		_timer_rain.update(dt_);
-		
-		_timer_group.update(dt_);
-		if(_timer_group.val()==1){
-			(++_idx_group)%=FRUIT_GROUP;
-			_timer_group.restart();
-
-			if(!_slow){
-				_juice.addWave(ofColor(ofRandom(255),ofRandom(255),ofRandom(255),200));
-			}
+		if(_timer_rain.val()==1){
+			addNewFruit();
+			_timer_rain.restart();
 		}
 
+
+		if(_auto_fruit){
+			_timer_group.update(dt_);
+			if(_timer_group.val()==1){
+				(++_idx_group)%=FRUIT_GROUP;
+				_timer_group.restart();
+
+				if(!_slow){
+					_juice.addWave(ofColor(ofRandom(255),ofRandom(255),ofRandom(255),200));
+				}
+			}
+		}
 
 		
 	}
@@ -206,6 +214,13 @@ public:
 			_juice.addWave(ofColor(_color[_idx_group],120));
         }else _timer_rain.setDue(FRUIT_RAIN_INTERVAL);
     }
+
+	void setAutoFruit(bool set_){
+		_auto_fruit=set_;
+	}
+	void setFruit(int set_){
+		_idx_group=set_;
+	}
 };
 
 

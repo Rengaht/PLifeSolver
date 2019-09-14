@@ -44,7 +44,7 @@ void ofApp::setup(){
 	_fbo_save.allocate(GIF_HEIGHT,GIF_HEIGHT);
 	_recorder.setFormat("png");
 	_recording=false;
-	_timer_record=FrameTimer(1000.0/(float)RECORD_FPS);
+	_timer_record=FrameTimer(1000.0/(float)GIF_FPS);
 	ofAddListener(_timer_record.finish_event,this,&ofApp::onRecordTimerFinish);
 	
 	ofAddListener(_recorder.recordFinish,this,&ofApp::onRecorderFinish);
@@ -64,10 +64,15 @@ void ofApp::update(){
 
 	if(!_camera_paused){
 		_camera.update();
-	    if(_stage==PSLEEP && _camera.isFrameNew()){
+	    if(_camera.isFrameNew()){
 			_finder.update(_camera);
 		}		
-		_timer_record.update(dt_);
+		//_timer_record.update(dt_);
+	}
+
+	if(_face_analysis_ready){
+		createShareImage();
+		_face_analysis_ready=false;
 	}
 
 	_fruit_rain.update(dt_);
@@ -79,6 +84,7 @@ void ofApp::update(){
 void ofApp::draw(){
 
 	_camera.draw(CAM_WIDTH,0,-CAM_WIDTH,CAM_HEIGHT);
+	if(!_camera_paused) drawFaceFrame();
 	//_img_mask.draw(0,0);
 
 	ofPushMatrix();
@@ -116,7 +122,9 @@ void ofApp::keyPressed(int key){
 			//sendFaceRequest();
 			uploadImage("test");
 			break;
-
+		case 'g':
+			createFruitImage();
+			break;
 	}
 }
 
@@ -167,6 +175,12 @@ void ofApp::prepareScene(PStage set_){
 	_stage_next=set_;
 	if(_stage!=PEMPTY) _scene[_stage]->end();
 
+	switch(set_){
+		case PANALYSIS:
+			saveCameraFrame();
+			break;
+	}
+
 }
 
 void ofApp::setStage(PStage set_){
@@ -215,19 +229,20 @@ void ofApp::onRecordTimerFinish(int &e){
 
 void ofApp::drawFaceFrame(){
 	ofPushStyle();
-    ofSetColor(255,0,0);
     ofNoFill();
     
     int len=_finder.size();
     for(int i=0;i<len;++i){
-        ofDrawRectangle(_finder.getObject(i));
+        //ofDrawRectangle(_finder.getObject(i));
 
         auto rec_=_finder.getObject(i);
         
-        ofSetColor(255);
+        ofSetColor(238,216,152);
         ofPushMatrix();
+		ofTranslate(CAM_WIDTH,0);
+		ofScale(-1,1);
         ofTranslate(rec_.getPosition());
-        _img_frame.draw(0,0,rec_.getWidth(),rec_.getHeight());
+			ofDrawRectangle(0,0,rec_.getWidth(),rec_.getHeight());
         ofPopMatrix();
     }
     ofPopStyle();
@@ -238,6 +253,7 @@ bool ofApp::faceFound(){
 
 void ofApp::sendFaceRequest(){
 	ofLog()<<">>>>>> Send Face Requeset...";
+	_face_analysis_ready=false;
 
 	string url_="https://naturalbenefits-lifesolver.cognitiveservices.azure.com/face/v1.0/detect?returnFaceAttributes=age,gender,emotion,smile&returnFaceLandmarks=true";	
 	
@@ -245,7 +261,7 @@ void ofApp::sendFaceRequest(){
     tmp_.setFromPixels(_camera.getPixels().getData(),_camera.getWidth(),_camera.getHeight(),OF_IMAGE_COLOR);
     tmp_.mirror(false, true);
     tmp_.save("raw/"+_user_id+".jpg");*/
-    ofBuffer data_=ofBufferFromFile("tmp/"+_user_id+"_0000.jpg",true);
+    ofBuffer data_=ofBufferFromFile("raw/"+_user_id+".png",true);
 
 	ofxHttpForm form_;
     form_.action=url_;
@@ -268,7 +284,7 @@ void ofApp::urlResponse(ofxHttpResponse &resp_){
     }
 
 	if(resp_.url.find("azure.com")!=-1){
-        //ofLog()<<"receive: "<<resp_.responseBody;
+        ofLog()<<"receive: "<<resp_.responseBody;
         parseFaceData(resp_.responseBody);
         
         if(_stage==PANALYSIS){
@@ -305,8 +321,14 @@ void ofApp::parseFaceData(string data_){
 			_rect_face.push_back(rect_);
 
             _idx_user_juice=getJuiceFromEmotion(json_[i]["faceAttributes"]["emotion"]);
-			_recorder.setJuiceID(_idx_user_juice);
+			
+			if(_idx_user_juice<0){
+				prepareScene(PSLEEP);
+				return;
+			}
 
+			_recorder.setJuiceID(_idx_user_juice);
+			_face_analysis_ready=true;
 		}
         _user_data["face"]=json_;
 	}
@@ -317,7 +339,7 @@ int ofApp::getJuiceFromEmotion(ofxJSONElement emotion_){
 	// find highest score
 	float val_=0;
 	string mood_;
-	int juice_;
+	int juice_=-1;
 	auto name_=emotion_.getMemberNames();
 	
 	for(auto& n:name_){
@@ -375,52 +397,104 @@ void ofApp::drawOutFrame(){
 void ofApp::setRecord(bool set_){
 	_recording=set_;
 	if(set_){
-		_idx_record=0;
+		/*_idx_record=0;
 		_recorder.setPrefix(ofToDataPath("tmp/"+_user_id+"_"));
-		_recorder.setUserID(_user_id);
+		_recorder.setUserID(_user_id);*/
 		
-		_timer_record.restart();
+		//_timer_record.restart();
 
 		//_recorder.startThread();
-		ofSystem("DEL /F/Q "+ofToDataPath("tmp\\")+"*.png");
+		ofSystem("DEL /F/Q "+ofToDataPath("tmp\\")+"*.jpg");
 
 		ofLog()<<"start recording.... "<<ofGetElapsedTimeMillis();
 	}else{
-		_timer_record.stop();
+		//_timer_record.stop();
 		ofLog()<<"end recording..."<<ofGetElapsedTimeMillis()<<" #fr= "<<_idx_record;
 	}
 }
 void ofApp::saveCameraFrame(){
 	_fbo_save.begin();
 	ofClear(255);
-		_camera.draw(GIF_HEIGHT/2-_camera.getWidth()/2,GIF_HEIGHT/2-_camera.getHeight()/2);
-		//_fruit_rain.draw();
-		_img_share_frame.draw(0,0,GIF_HEIGHT,GIF_HEIGHT);
-		//_img_share_text[_idx_user_juice].draw(0,0,_fbo_save.getWidth(),_fbo_save.getHeight());
+		_camera.draw(GIF_HEIGHT/2-_camera.getWidth()/2,GIF_HEIGHT/2-_camera.getHeight()/2);		
 	_fbo_save.end();
+	
 
-	ofPixels pix;
-    _fbo_save.readToPixels(pix);
-    _recorder.addFrame(pix);
+	ofPixels pix;	
+    _fbo_save.readToPixels(pix);	
+	pix.mirror(false,true);
+	ofSaveImage(pix,"raw/"+_user_id+".png");
 
-	_idx_record++;
 }
+void ofApp::createShareImage(){
+	ofLog()<<"Create Share Image !!!";
+	
+	_idx_record=0;
+	_recorder.setPrefix(ofToDataPath("tmp/"+_user_id+"_"));
+	_recorder.setUserID(_user_id);
+
+	ofImage img_;
+	img_.load("raw/"+_user_id+".png");
+
+	
+	for(int i=0;i<GIF_LENGTH*GIF_FPS;++i){
+		_fbo_save.begin();
+		ofClear(255);
+			img_.draw(0,0);
+
+			//TODO: add fruit rain!!!
+
+		_fbo_save.end();
+
+		ofPixels pix;
+		_fbo_save.readToPixels(pix);
+		_recorder.addFrame(pix);
+	}
+
+}
+void ofApp::createFruitImage(){
+
+	ofLog()<<"Create Fruit Image !!!";
+	
+	for(int x=0;x<MJUICE_RESULT;++x){
+		
+		_fruit_rain.reset();
+		_fruit_rain.setAutoFruit(false);	
+		
+		_fruit_rain.setFruit(x);
+		_fruit_rain.start();
+
+		for(int i=0;i<GIF_LENGTH*GIF_FPS;++i){
+			_fbo_save.begin();
+			ofClear(255);
+				ofPushMatrix();
+				ofScale((float)GIF_HEIGHT/WIN_HEIGHT,(float)GIF_HEIGHT/WIN_HEIGHT);
+				ofTranslate(-FRUIT_BORDER,0);			
+					_fruit_rain.draw();
+				ofPopMatrix();
+				_img_share_frame.draw(0,0);
+				_img_share_text[_idx_user_juice].draw(0,0,_fbo_save.getWidth(),_fbo_save.getHeight());
+			_fbo_save.end();
+
+			ofPixels pix;
+			_fbo_save.readToPixels(pix);
+			ofSaveImage(pix,"juice/"+ofToString(x+1)+"/"+ofToString(i,4,'0')+".png");
+
+			_fruit_rain.update(1000/(float)GIF_FPS*10);
+		}
+	}
+}
+
 void ofApp::onRecorderFinish(int &e){
-	ofLog()<<"Recorder finish!!!";
+	ofLog()<<"Recorder finish !!!";
 	
 	uploadImage(_user_id);
-	
-	
-	//string cmd="\"C:\\Program Files\\ImageMagick-7.0.8-Q16\\magick.exe\" "+ofToDataPath("tmp/")+"*.png "
-	//			+"-reverse "+ofToDataPath("tmp/")+"*.png -loop 0 -resize 800x800 "
-	//			+ofToDataPath("output/")+_user_id+".gif";
-	//ofLog()<<cmd;
-	//ofSystem(cmd);
-
+		
 }
 
 void ofApp::uploadImage(string id_){
 	
+	ofLog()<<"Upload Image !!!";
+
 	string filename_="output/"+id_+".gif";
     
     ofxHttpForm form_;
