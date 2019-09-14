@@ -82,6 +82,18 @@
     <ClCompile Include="..\..\..\addons\ofxSvg\libs\svgTiny\src\svgtiny_gradient.cpp">
       <Filter>addons\ofxSvg</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\addons\ofxQRCodeGenerator\src\ofxQRCodeGenerator.cpp">
+      <Filter>addons\ofxQRCodeGenerator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\addons\ofxQRCodeGenerator\libs\qrencode\include\BitBuffer.cpp">
+      <Filter>addons\ofxQRCodeGenerator\libs</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\addons\ofxQRCodeGenerator\libs\qrencode\include\QrCode.cpp">
+      <Filter>addons\ofxQRCodeGenerator\libs</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\addons\ofxQRCodeGenerator\libs\qrencode\include\QrSegment.cpp">
+      <Filter>addons\ofxQRCodeGenerator\libs</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="src">
@@ -158,6 +170,12 @@
     </Filter>
     <Filter Include="addons\ofxSvg">
       <UniqueIdentifier>{5b5e8c71-7d6a-44b8-adc5-a95a0347dc2a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="addons\ofxQRCodeGenerator">
+      <UniqueIdentifier>{43bae148-2531-4997-8434-43440163563e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="addons\ofxQRCodeGenerator\libs">
+      <UniqueIdentifier>{8e4d093a-137c-49d2-ab76-430a6254b6e3}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -277,6 +295,18 @@
     </ClInclude>
     <ClInclude Include="..\..\..\addons\ofxSvg\libs\svgTiny\src\svgtiny_internal.h">
       <Filter>addons\ofxSvg</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\addons\ofxQRCodeGenerator\src\ofxQRCodeGenerator.h">
+      <Filter>addons\ofxQRCodeGenerator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\addons\ofxQRCodeGenerator\libs\qrencode\include\BitBuffer.hpp">
+      <Filter>addons\ofxQRCodeGenerator\libs</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\addons\ofxQRCodeGenerator\libs\qrencode\include\QrCode.hpp">
+      <Filter>addons\ofxQRCodeGenerator\libs</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\addons\ofxQRCodeGenerator\libs\qrencode\include\QrSegment.hpp">
+      <Filter>addons\ofxQRCodeGenerator\libs</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

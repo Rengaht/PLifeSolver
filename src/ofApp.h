@@ -13,11 +13,15 @@
 #define MJUICE_RESULT 8
 #define RECORD_FPS 15
 
+#define GIF_HEIGHT 700
+
 #include "ofMain.h"
 
 #include "ofxCv.h"
 #include "ofxHttpUtils.h"
 #include "ofxJSON.h"
+#include "ofxQRCodeGenerator.h"
+
 #include "ofxImageSequenceRecorder.h"
 #include "PSceneBase.h"
 #include "PFruitRain.h"
@@ -54,7 +58,9 @@ class ofApp : public ofBaseApp{
 		
 		PJuice getJuice(string mood_);
 		bool checkJuiceStorage(PJuice get_);
-
+		void sendJuiceSignal(int send_);
+		ofSerial _serial;
+		void setupSerial();
 
 
 		ofEvent<int> _event_recieve_emotion;
@@ -74,10 +80,14 @@ class ofApp : public ofBaseApp{
 		
 
 		bool _recording;
+		FrameTimer _timer_record;
 		int _idx_record;
 		void setRecord(bool set_);
 
-		
+		/* share */
+		void uploadImage(string id_);
+		void createQRcode(string url_);
+		ofxQRCodeGenerator _qrcode_gen;
 
 		/* basic */
 
@@ -108,6 +118,7 @@ class ofApp : public ofBaseApp{
 		ofxImageSequenceRecorder _recorder;    
 		void saveCameraFrame();
 		void onRecorderFinish(int &e);
+		void onRecordTimerFinish(int &e);
 
 
 		PFruitRain _fruit_rain;

@@ -114,7 +114,7 @@
       <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
-      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);src;..\..\..\addons\ofxCv\libs\ofxCv\include;..\..\..\addons\ofxCv\libs\CLD\include\CLD;..\..\..\addons\ofxCv\src;..\..\..\addons\ofxHttpUtils\src;..\..\..\addons\ofxJSON\libs;..\..\..\addons\ofxJSON\libs\jsoncpp;..\..\..\addons\ofxJSON\libs\jsoncpp\include;..\..\..\addons\ofxJSON\libs\jsoncpp\include\json;..\..\..\addons\ofxJSON\libs\jsoncpp\src;..\..\..\addons\ofxJSON\src;..\..\..\addons\ofxTrueTypeFontUC\src;..\..\..\addons\ofxOpenCv\libs\opencv\include;..\..\..\addons\ofxOpenCv\libs\opencv;..\..\..\addons\ofxOpenCv\libs;..\..\..\addons\ofxSvg\src;..\..\..\addons\ofxSvg\libs\svgTiny\src</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);src;..\..\..\addons\ofxCv\libs\ofxCv\include;..\..\..\addons\ofxCv\libs\CLD\include\CLD;..\..\..\addons\ofxCv\src;..\..\..\addons\ofxHttpUtils\src;..\..\..\addons\ofxJSON\libs;..\..\..\addons\ofxJSON\libs\jsoncpp;..\..\..\addons\ofxJSON\libs\jsoncpp\include;..\..\..\addons\ofxJSON\libs\jsoncpp\include\json;..\..\..\addons\ofxJSON\libs\jsoncpp\src;..\..\..\addons\ofxJSON\src;..\..\..\addons\ofxTrueTypeFontUC\src;..\..\..\addons\ofxOpenCv\libs\opencv\include;..\..\..\addons\ofxOpenCv\libs\opencv;..\..\..\addons\ofxOpenCv\libs;..\..\..\addons\ofxSvg\src;..\..\..\addons\ofxSvg\libs\svgTiny\src;..\..\..\addons\ofxQRCodeGenerator\src;..\..\..\addons\ofxQRCodeGenerator\libs\qrencode\include</AdditionalIncludeDirectories>
       <CompileAs>CompileAsCpp</CompileAs>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
@@ -171,6 +171,10 @@
     <PostBuildEvent />
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\addons\ofxQRCodeGenerator\libs\qrencode\include\BitBuffer.cpp" />
+    <ClCompile Include="..\..\..\addons\ofxQRCodeGenerator\libs\qrencode\include\QrCode.cpp" />
+    <ClCompile Include="..\..\..\addons\ofxQRCodeGenerator\libs\qrencode\include\QrSegment.cpp" />
+    <ClCompile Include="..\..\..\addons\ofxQRCodeGenerator\src\ofxQRCodeGenerator.cpp" />
     <ClCompile Include="..\..\..\addons\ofxSvg\libs\svgTiny\src\src_colors.cpp" />
     <ClCompile Include="..\..\..\addons\ofxSvg\libs\svgTiny\src\svgtiny.cpp" />
     <ClCompile Include="..\..\..\addons\ofxSvg\libs\svgTiny\src\svgtiny_gradient.cpp" />
@@ -198,6 +202,10 @@
     <ClCompile Include="..\..\..\addons\ofxTrueTypeFontUC\src\ofxTrueTypeFontUC.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\addons\ofxQRCodeGenerator\libs\qrencode\include\BitBuffer.hpp" />
+    <ClInclude Include="..\..\..\addons\ofxQRCodeGenerator\libs\qrencode\include\QrCode.hpp" />
+    <ClInclude Include="..\..\..\addons\ofxQRCodeGenerator\libs\qrencode\include\QrSegment.hpp" />
+    <ClInclude Include="..\..\..\addons\ofxQRCodeGenerator\src\ofxQRCodeGenerator.h" />
     <ClInclude Include="..\..\..\addons\ofxSvg\libs\svgTiny\src\svgtiny.h" />
     <ClInclude Include="..\..\..\addons\ofxSvg\libs\svgTiny\src\svgtiny_internal.h" />
     <ClInclude Include="..\..\..\addons\ofxSvg\src\ofxSvg.h" />

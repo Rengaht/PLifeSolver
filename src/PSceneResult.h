@@ -68,6 +68,10 @@ public:
                 break;
 			case 3:
 				_img_qrcode.draw(0,0,WIN_HEIGHT,WIN_HEIGHT);
+				ofPushMatrix();
+				ofTranslate(682,704);
+					_ptr_app->_qrcode_gen.draw(117,255*getLayerAlpha(i));
+				ofPopMatrix();
 				break;
 		}
 
