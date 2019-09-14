@@ -50,6 +50,10 @@ void ofApp::setup(){
 	ofAddListener(_recorder.recordFinish,this,&ofApp::onRecorderFinish);
 	_recorder.startThread();
 
+	_fbo_contour.allocate(ofGetWidth(),ofGetHeight(),GL_LUMINANCE);
+
+	
+
 	ofEnableSmoothing();
 
 
@@ -66,6 +70,8 @@ void ofApp::update(){
 		_camera.update();
 	    if(_camera.isFrameNew()){
 			_finder.update(_camera);
+			//_contour_finder.findContours(_camera);	
+			//drawContour();
 		}		
 		//_timer_record.update(dt_);
 	}
@@ -83,8 +89,15 @@ void ofApp::update(){
 //--------------------------------------------------------------
 void ofApp::draw(){
 
-	_camera.draw(CAM_WIDTH,0,-CAM_WIDTH,CAM_HEIGHT);
-	if(!_camera_paused) drawFaceFrame();
+	ofPushMatrix();
+	//ofTranslate(ofGetWidth(),0);
+	//ofScale(-1,0);
+		
+		_camera.draw(0,0,CAM_WIDTH,CAM_HEIGHT);
+		if(!_camera_paused && _stage>PSLEEP) drawFaceFrame();
+		
+	ofPopMatrix();
+
 	//_img_mask.draw(0,0);
 
 	ofPushMatrix();
@@ -194,11 +207,15 @@ void ofApp::setStage(PStage set_){
 			_fruit_rain.start();
 			break;
         case PANALYSIS:
+			setCameraPause(true);
             _fruit_rain.setSlow(false);
             break;
         case PRESULT:
             _fruit_rain.stop();
             break;
+		case PSLEEP:
+			setCameraPause(false);
+			break;
 	}
 
 	_stage=set_;
@@ -207,8 +224,17 @@ void ofApp::setStage(PStage set_){
 
 void ofApp::setupCamera(){
 	_camera.setup(CAM_WIDTH,CAM_HEIGHT);	
+	
 	_finder.setup("haarcascade_frontalface_default.xml");
 	_finder.setPreset(ObjectFinder::Fast);
+	_finder.setFindBiggestObject(true);
+
+
+	_contour_finder.setMinAreaRadius(WIN_HEIGHT*.3);
+	_contour_finder.setMaxAreaRadius(WIN_HEIGHT*.6);
+	_contour_finder.setThreshold(120);
+	_contour_finder.setSimplify(true);
+	_contour_finder.setFindHoles(false);
 
 	_camera_paused=false;
 }
@@ -239,8 +265,8 @@ void ofApp::drawFaceFrame(){
         
         ofSetColor(238,216,152);
         ofPushMatrix();
-		ofTranslate(CAM_WIDTH,0);
-		ofScale(-1,1);
+		/*ofTranslate(CAM_WIDTH,0);
+		ofScale(-1,1);*/
         ofTranslate(rec_.getPosition());
 			ofDrawRectangle(0,0,rec_.getWidth(),rec_.getHeight());
         ofPopMatrix();
@@ -250,6 +276,42 @@ void ofApp::drawFaceFrame(){
 bool ofApp::faceFound(){
     return _finder.size()>0;
 }
+void ofApp::drawContour(){
+	
+	_fbo_contour.begin();
+	ofClear(0);
+	ofPushStyle();
+	ofFill();
+	//ofSetColor(255,0,0);
+
+    int len=_finder.size();
+    for(int i=0;i<len;++i){
+        auto rec_=_finder.getObject(i);
+
+		auto pp=_contour_finder.getPolylines();
+		for(auto&p:pp){
+			if(rec_.intersects(p.getBoundingBox())){
+				
+				ofPath p_;
+				p_.newSubPath();
+				p_.moveTo(p.getVertices()[0]);
+				for(auto& t:p.getVertices()) p_.lineTo(t);
+				p_.close();
+				p_.simplify();
+
+				p_.draw();
+			}
+		}
+	
+	}
+	ofPopStyle();
+	_fbo_contour.end();
+
+	_camera.getTexture().setAlphaMask(_fbo_contour.getTexture());
+
+	//_contour_finder.draw();
+}
+
 
 void ofApp::sendFaceRequest(){
 	ofLog()<<">>>>>> Send Face Requeset...";

@@ -28,7 +28,7 @@ public:
 		_mlayer=2;
 		_order_scene=0;
 
-		_timer_hint=FrameTimer(3000);
+		_timer_hint=FrameTimer(8000);
 		_timer_hint.restart();
 
 		_timer_confirm=FrameTimer(2000);
@@ -123,7 +123,7 @@ public:
 	}
 
 	void onTimerConfirmFinish(int &e){		 
-		_ptr_app->prepareScene(ofApp::PAUTH);			 		
+		//_ptr_app->prepareScene(ofApp::PAUTH);			 		
 	}
 };
 

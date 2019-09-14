@@ -84,11 +84,15 @@ public:
 		return sin(p *HALF_PI);
 	}
 	float valEaseIn(){
-		float t=val();
+		return valEaseIn(val());
+	}
+	float valEaseIn(float t){		
 		return t*t*t*t;
 	}
 	float valEaseOut(){
-		float t=val();
+		return valEaseOut(val());
+	}
+	float valEaseOut(float t){
 		return -((t-=1)*t*t*t-1);
 		//return t;
 	}
@@ -115,12 +119,12 @@ public:
 	float valFade(){
 
 		float p=val();
-		float seg=3;
+		float seg=8;
 		p*=seg;
 
-		if(p<1) return valEaseInOut(p);
+		if(p<1) return valEaseIn(p);
 		else if(p<seg-1) return 1;
-		else return 1.0-valEaseInOut(p-(seg-1));
+		else return 1.0-valEaseIn(p-(seg-1));
 
 	}
 	bool isStart(){

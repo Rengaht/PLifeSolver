@@ -69,6 +69,8 @@ class ofApp : public ofBaseApp{
 
 		bool faceFound();
 		void drawFaceFrame();
+		void drawContour();
+		ofFbo _fbo_contour;
 
 		vector<ofRectangle> _rect_face;
 		ofxJSONElement _user_data;
@@ -113,6 +115,7 @@ class ofApp : public ofBaseApp{
 
 		ofVideoGrabber _camera;
         ofxCv::ObjectFinder _finder;
+		ofxCv::ContourFinder _contour_finder;
 
 		void setStage(PStage set_);
 
