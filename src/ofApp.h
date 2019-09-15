@@ -1,6 +1,10 @@
 #pragma once
 
 #define DRAW_DEBUG
+#define USE_BACKGROUND_SUB
+#define BGD_DETECT_SCALE 0.2
+
+
 #define CAM_WIDTH 1920
 #define CAM_HEIGHT 1080
 
@@ -14,12 +18,16 @@
 #define GIF_HEIGHT 700
 #define GIF_LENGTH 5
 
+
+
 #include "ofMain.h"
 
 #include "ofxCv.h"
 #include "ofxHttpUtils.h"
 #include "ofxJSON.h"
 #include "ofxQRCodeGenerator.h"
+#include "ofxLayerMask.h"
+
 
 #include "ofxImageSequenceRecorder.h"
 #include "PSceneBase.h"
@@ -67,7 +75,6 @@ class ofApp : public ofBaseApp{
 
 		bool faceFound();
 		void drawFaceFrame();
-		void drawContour();
 		ofFbo _fbo_contour;
 
 		vector<ofRectangle> _rect_face;
@@ -80,7 +87,7 @@ class ofApp : public ofBaseApp{
 
 		
 		PFruitRain _fruit_rain;
-		
+		void drawForeground();
 
 		bool _recording;
 		FrameTimer _timer_record;
@@ -115,6 +122,15 @@ class ofApp : public ofBaseApp{
 		ofVideoGrabber _camera;
         ofxCv::ObjectFinder _finder;
 		ofxCv::ContourFinder _contour_finder;
+		
+		ofxCv::RunningBackground _background;
+		ofImage _img_threshold;
+		float _bgd_learning_time,_bgd_threshold;
+		ofFbo _fbo_bgd_tmp,_fbo_threshold_tmp,_fbo_bgd;
+		ofxLayerMask _masker;
+		void updateBackground();
+		
+
 
 		void setStage(PStage set_);
 

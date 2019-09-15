@@ -37,7 +37,11 @@ public:
 	void drawLayer(int i){
 		switch(i){
 			case 0:
-				_ptr_app->_fruit_rain.draw(1.0-_timer_out[0].valEaseInOut());
+				_ptr_app->_fruit_rain.drawBack(1.0-_timer_out[0].valEaseInOut());
+#ifdef USE_BACKGROUND_SUB
+				_ptr_app->drawForeground();
+#endif
+				_ptr_app->_fruit_rain.drawFront(1.0-_timer_out[0].valEaseInOut());
 
 				ofPushStyle();
 				ofSetColor(255,255*_timer_hint.valFade()*getLayerAlpha(0));

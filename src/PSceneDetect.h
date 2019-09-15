@@ -47,8 +47,11 @@ public:
 		switch(i){
 			case 0:
 
-				_ptr_app->_fruit_rain.draw(1);
-
+				_ptr_app->_fruit_rain.drawBack(1);
+#ifdef USE_BACKGROUND_SUB
+				_ptr_app->drawForeground();
+#endif
+				_ptr_app->_fruit_rain.drawFront(1);
 				ofPushStyle();
 				ofSetColor(255,255*ofClamp(1.0-_timer_count.val(),0,1)*getLayerAlpha(0));
 					_img_number[(int)ofClamp(MDETECT_COUNT-1-_num_count,0,MDETECT_COUNT-1)].draw(0,0,WIN_HEIGHT,WIN_HEIGHT);					

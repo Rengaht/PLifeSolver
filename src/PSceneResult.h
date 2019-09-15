@@ -53,7 +53,11 @@ public:
 		int num_=ofClamp(QRCODE_TIME/1000-_num_count,0,QRCODE_TIME/1000);
 		switch(i){
 			case 0:
-				_ptr_app->_fruit_rain.draw(getLayerAlpha(0));
+				_ptr_app->_fruit_rain.drawBack(getLayerAlpha(0));
+#ifdef USE_BACKGROUND_SUB
+				_ptr_app->drawForeground();
+#endif
+				_ptr_app->_fruit_rain.drawFront(getLayerAlpha(0));
 				ofPushStyle();
 				ofSetColor(0,160*getLayerAlpha(i));
 					ofDrawRectangle(0,0,WIN_HEIGHT,WIN_HEIGHT);

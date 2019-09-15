@@ -94,6 +94,9 @@
     <ClCompile Include="..\..\..\addons\ofxQRCodeGenerator\libs\qrencode\include\QrSegment.cpp">
       <Filter>addons\ofxQRCodeGenerator\libs</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\addons\ofxLayerMask\src\ofxLayerMask.cpp">
+      <Filter>addons\ofxLayerMask</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="src">
@@ -176,6 +179,9 @@
     </Filter>
     <Filter Include="addons\ofxQRCodeGenerator\libs">
       <UniqueIdentifier>{8e4d093a-137c-49d2-ab76-430a6254b6e3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="addons\ofxLayerMask">
+      <UniqueIdentifier>{dfc179cf-0093-418f-ae59-4d6225f32ceb}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -307,6 +313,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\addons\ofxQRCodeGenerator\libs\qrencode\include\QrSegment.hpp">
       <Filter>addons\ofxQRCodeGenerator\libs</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\addons\ofxLayerMask\src\ofxLayerMask.h">
+      <Filter>addons\ofxLayerMask</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

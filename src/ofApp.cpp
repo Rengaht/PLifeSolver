@@ -52,7 +52,16 @@ void ofApp::setup(){
 
 	_fbo_contour.allocate(ofGetWidth(),ofGetHeight(),GL_LUMINANCE);
 
+	_bgd_learning_time=5;
+	_bgd_threshold=10;
 	
+
+	_fbo_bgd_tmp.allocate(_camera.getWidth()*BGD_DETECT_SCALE,_camera.getHeight()*BGD_DETECT_SCALE,GL_RGB);
+	_fbo_threshold_tmp.allocate(_camera.getWidth(),_camera.getHeight(),GL_LUMINANCE);
+	_fbo_bgd.allocate(_camera.getWidth(),_camera.getHeight(),GL_RGB);
+
+	_masker.setup(_camera.getWidth(),_camera.getHeight());
+	_masker.newLayer();
 
 	ofEnableSmoothing();
 
@@ -61,7 +70,7 @@ void ofApp::setup(){
 
 //--------------------------------------------------------------
 void ofApp::update(){
-	ofSetBackgroundColor(0);
+	ofSetBackgroundColor(255);
 	
 	int dt_=ofGetElapsedTimeMillis()-_millis_now;
 	_millis_now+=dt_;
@@ -72,6 +81,11 @@ void ofApp::update(){
 			_finder.update(_camera);
 			//_contour_finder.findContours(_camera);	
 			//drawContour();
+#ifdef USE_BACKGROUND_SUB
+			updateBackground();
+#endif
+			
+
 		}		
 		if(_recording) _timer_record.update(dt_);
 	}
@@ -92,11 +106,12 @@ void ofApp::draw(){
 	float cam_scale=(float)ofGetHeight()/_camera.getHeight();
 	float cam_wid=_camera.getWidth()*cam_scale;
 	ofTranslate(ofGetWidth()/2-cam_wid/2,0);
-	ofScale(cam_scale,cam_scale);
-		
-		_camera.draw(_camera.getWidth(),0,-_camera.getWidth(),_camera.getHeight());
-		if(!_camera_paused && _stage>PSLEEP) drawFaceFrame();
-		
+	ofScale(cam_scale,cam_scale);			
+	
+
+	_camera.draw(_camera.getWidth(),0,-_camera.getWidth(),_camera.getHeight());
+
+	if(!_camera_paused && _stage>PSLEEP) drawFaceFrame();
 	ofPopMatrix();
 
 	//_img_mask.draw(0,0);
@@ -117,6 +132,15 @@ void ofApp::draw(){
 		_scene[_stage]->draw();			
 	ofPopMatrix();
 	
+	if(!_camera_paused && _stage>PSLEEP){
+		ofPushMatrix();
+		ofTranslate(ofGetWidth()/2-cam_wid/2,0);
+		ofScale(cam_scale,cam_scale);				
+			 drawFaceFrame();
+		ofPopMatrix();
+	}
+
+
 	float w_=ofGetHeight()/(float)WIN_HEIGHT*WIN_WIDTH;
 	_img_frame.draw(ofGetWidth()/2-w_/2,0,w_,ofGetHeight());
 
@@ -133,13 +157,120 @@ void ofApp::draw(){
 	
 #ifdef DRAW_DEBUG
 	ofPushStyle();
-	ofSetColor(255,0,0);
-	
+	ofSetColor(255,0,0);	
 	ofDrawBitmapString("fps= "+ofToString(ofGetFrameRate()),ofGetWidth()-100,10);
+
+	ofDrawBitmapString("learning_time= "+ofToString(_bgd_learning_time),ofGetWidth()-200,20);
+	ofDrawBitmapString("threhold= "+ofToString(_bgd_threshold),ofGetWidth()-200,30);
+	
+	
+	/*ofFill();
+	ofPushMatrix();
+	ofTranslate(ofGetWidth()/2,580);
+	ofBeginShape();
+	float m=210;
+	float a_=TWO_PI/m;
+	float r_=200;
+	for(float i=0;i<m;++i){
+		float rr_=r_*(1.0+.3*ofNoise(i/100.0));
+		ofVertex(rr_*sin(i*a_),rr_*cos(i*a_));
+	}
+	ofEndShape();
+	
+	ofPopMatrix();*/
+
 	ofPopStyle();
+
+
+	_fbo_bgd_tmp.draw(0,0,_camera.getWidth()*BGD_DETECT_SCALE,_camera.getHeight()*BGD_DETECT_SCALE);
+	_img_threshold.draw(0,_camera.getHeight()*BGD_DETECT_SCALE,_camera.getWidth()*BGD_DETECT_SCALE,_camera.getHeight()*BGD_DETECT_SCALE);
+	_fbo_threshold_tmp.draw(0,_camera.getHeight()*BGD_DETECT_SCALE*2,_camera.getWidth()*BGD_DETECT_SCALE,_camera.getHeight()*BGD_DETECT_SCALE);
 #endif
 
 }
+void ofApp::updateBackground(){
+	_fbo_bgd_tmp.begin();
+	ofClear(0);
+		_camera.draw(0,0,_fbo_bgd_tmp.getWidth(),_fbo_bgd_tmp.getHeight());
+	_fbo_bgd_tmp.end();
+			
+	ofPixels pix;	
+	_fbo_bgd_tmp.readToPixels(pix);
+
+	_background.setLearningTime(_bgd_learning_time);
+	_background.setThresholdValue(_bgd_threshold);
+	_background.update(pix,_img_threshold);
+	_img_threshold.update();
+
+	_contour_finder.findContours(_img_threshold);
+
+	_fbo_threshold_tmp.begin();
+	ofClear(0);
+//		_img_threshold.draw(0,0,_fbo_threshold_tmp.getWidth(),_fbo_threshold_tmp.getHeight());
+	ofPushMatrix();
+	ofScale(1.0/BGD_DETECT_SCALE,1.0/BGD_DETECT_SCALE);
+		ofPushStyle();
+		ofFill();
+		//ofSetColor(255,0,0);
+
+		auto pp=_contour_finder.getPolylines();
+		for(auto&p:pp){
+		//	if(rec_.intersects(p.getBoundingBox())){
+				
+				ofPath p_;
+				p_.newSubPath();
+				p_.moveTo(p.getVertices()[0]);
+				for(auto& t:p.getVertices()) p_.lineTo(t);
+				p_.close();				
+				p_.simplify(2.0);				
+				p_.draw();
+		//	}
+		}
+	
+		
+		ofPopStyle();
+	ofPopMatrix();
+	_fbo_threshold_tmp.end();		
+			
+	_fbo_bgd.begin();
+	ofClear(0);
+		_camera.draw(0,0);
+	_fbo_bgd.end();
+}
+void ofApp::drawForeground(){
+	
+
+	_masker.beginMask();
+		ofClear(0);
+		_fbo_threshold_tmp.draw(_camera.getWidth(),0,-_camera.getWidth(),_camera.getHeight());
+	_masker.endMask();
+
+	_masker.beginLayer();
+		ofClear(0);
+		_camera.draw(_camera.getWidth(),0,-_camera.getWidth(),_camera.getHeight());
+	_masker.endLayer();
+
+	float scale_=ofGetHeight()/(float)WIN_HEIGHT;
+	ofPushMatrix();	
+	ofScale(1.0/scale_,1.0/scale_);
+	ofTranslate(-ofGetWidth()/2+ofGetHeight()/2,0);
+
+	float cam_scale=(float)ofGetHeight()/_camera.getHeight();
+	float cam_wid=_camera.getWidth()*cam_scale;
+	ofTranslate(ofGetWidth()/2-cam_wid/2,0);
+	ofScale(cam_scale,cam_scale);	
+
+		_masker.draw();
+	ofPopMatrix();
+
+	//if(_img_threshold.isAllocated()){
+	//	//_img_threshold.draw(_camera.getWidth(),0,-_camera.getWidth(),_camera.getHeight());
+	//	_fbo_threshold_tmp.getTexture().setSwizzle(GL_TEXTURE_SWIZZLE_A,GL_RED);
+	//	_fbo_bgd.getTexture().setAlphaMask(_fbo_threshold_tmp.getTexture());
+	//}
+	//_fbo_bgd.draw(_camera.getWidth(),0,-_camera.getWidth(),_camera.getHeight());
+}
+
 
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key){
@@ -161,6 +292,24 @@ void ofApp::keyPressed(int key){
 			break;
 		case 'g':
 			//createFruitImage();
+			break;
+		case 'b':
+		case 'B':
+#ifdef USE_BACKGROUND_SUB
+			_background.reset();
+#endif
+			break;
+		case '-':
+			_bgd_learning_time=min(_bgd_learning_time+1,10.0f);
+			break;
+		case '=':
+			_bgd_learning_time=max(_bgd_learning_time-1,0.0f);
+			break;
+		case '[':
+			_bgd_threshold=min(_bgd_threshold+1,255.0f);
+			break;
+		case ']':
+			_bgd_threshold=max(_bgd_threshold-1,0.0f);
 			break;
 	}
 }
@@ -259,9 +408,9 @@ void ofApp::setupCamera(){
 	_finder.setFindBiggestObject(true);
 
 
-	_contour_finder.setMinAreaRadius(WIN_HEIGHT*.3);
-	_contour_finder.setMaxAreaRadius(WIN_HEIGHT*.6);
-	_contour_finder.setThreshold(120);
+	_contour_finder.setMinAreaRadius(_camera.getWidth()*BGD_DETECT_SCALE*.05);
+	_contour_finder.setMaxAreaRadius(_camera.getWidth()*BGD_DETECT_SCALE*.7);
+	_contour_finder.setThreshold(128);
 	_contour_finder.setSimplify(true);
 	_contour_finder.setFindHoles(false);
 
@@ -303,42 +452,6 @@ void ofApp::drawFaceFrame(){
 bool ofApp::faceFound(){
     return _finder.size()>0;
 }
-void ofApp::drawContour(){
-	
-	_fbo_contour.begin();
-	ofClear(0);
-	ofPushStyle();
-	ofFill();
-	//ofSetColor(255,0,0);
-
-    int len=_finder.size();
-    for(int i=0;i<len;++i){
-        auto rec_=_finder.getObject(i);
-
-		auto pp=_contour_finder.getPolylines();
-		for(auto&p:pp){
-			if(rec_.intersects(p.getBoundingBox())){
-				
-				ofPath p_;
-				p_.newSubPath();
-				p_.moveTo(p.getVertices()[0]);
-				for(auto& t:p.getVertices()) p_.lineTo(t);
-				p_.close();
-				p_.simplify();
-
-				p_.draw();
-			}
-		}
-	
-	}
-	ofPopStyle();
-	_fbo_contour.end();
-
-	_camera.getTexture().setAlphaMask(_fbo_contour.getTexture());
-
-	//_contour_finder.draw();
-}
-
 
 void ofApp::sendFaceRequest(){
 	ofLog()<<">>>>>> Send Face Requeset...";
@@ -539,7 +652,8 @@ void ofApp::createFruitImage(){
 				ofPushMatrix();
 				ofTranslate((float)GIF_HEIGHT/2,0);
 				ofScale((float)GIF_HEIGHT/WIN_HEIGHT,(float)GIF_HEIGHT/WIN_HEIGHT);
-					_fruit_rain.draw(1);
+					_fruit_rain.drawBack(1);
+					_fruit_rain.drawFront(1);
 				ofPopMatrix();
 				_img_share_frame.draw(0,0);
 				_img_share_text[x].draw(0,0,_fbo_save.getWidth(),_fbo_save.getHeight());

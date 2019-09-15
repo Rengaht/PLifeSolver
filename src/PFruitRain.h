@@ -28,6 +28,7 @@ public:
 	float _ang;
 	ofImage* _img;
 	ofVec2f _size;
+	bool _back;
 
 	PFruit(ofImage* img_,ofVec2f pos_,float ang_){
 		
@@ -38,6 +39,8 @@ public:
 
 		_pos=pos_;
 		_vel=ofVec2f(0,FRUIT_VEL);
+
+		_back=ofRandom(2)<1;
 		//_acc=ofVec2f(0,FRUIT_ACC);
 	}
 	void update(float dy_){
@@ -199,9 +202,17 @@ public:
 	}
 	
 
-	void draw(float alpha_){
+	void drawBack(float alpha_){
 		
-		for(auto& f:_fruit) f.draw(alpha_);
+		for(auto& f:_fruit) 
+			if(f._back) f.draw(alpha_);
+
+		
+	}
+	void drawFront(float alpha_){
+
+		for(auto& f:_fruit) 
+			if(!f._back) f.draw(alpha_);
 
 		if(!_slow){
 			ofPushMatrix();
