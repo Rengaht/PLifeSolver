@@ -4,9 +4,7 @@
 #define CAM_WIDTH 1920
 #define CAM_HEIGHT 1080
 
-#define SCREEN_WIDTH 1920
-#define SCREEN_HEIGHT 1080
-
+#define WIN_WIDTH 1920
 #define WIN_HEIGHT 1080
 
 #define FRUIT_COUNT 18

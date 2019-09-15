@@ -57,14 +57,14 @@ public:
 		_timer_hint.restart();
 	}
 	void onSceneInFinish(int &e){
-		_ptr_app->sendFaceRequest();
+		//_ptr_app->sendFaceRequest();
 	}
 	void onTimerHintFinish(int &e){
 		
 		(++_idx_hint)%=NUM_HINT_ANALYSIS;		
 		_timer_hint.restart();
 
-		if(_idx_hint==2) _glow.setWidth(260);
+		if(_idx_hint==2) _glow.setWidth(280);
 		else if(_idx_hint>2) _glow.setWidth(220);
 		else _glow.setWidth(150);
 

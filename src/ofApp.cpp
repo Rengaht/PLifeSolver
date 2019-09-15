@@ -27,7 +27,7 @@ void ofApp::setup(){
 	//setStage(PSLEEP);
 	_stage=PSLEEP;
 	_scene[_stage]->init();
-	
+	//setStage(PDETECT);
 
 
 	ofAddListener(SceneBase::sceneInFinish,this,&ofApp::onSceneInFinish);
@@ -99,21 +99,41 @@ void ofApp::draw(){
 	ofPopMatrix();
 
 	//_img_mask.draw(0,0);
+		
+	float scale_=ofGetHeight()/(float)WIN_HEIGHT;
 
 	ofPushMatrix();
-	ofTranslate(ofGetWidth()/2-ofGetHeight()/2,0);
-	ofScale(ofGetHeight()/1080.0,ofGetHeight()/1080.0);
-		
-		if(_stage==PDETECT || _stage==PANALYSIS) _fruit_rain.draw();		
-		_scene[_stage]->draw();			
-
-
+	
+	ofPushMatrix();
+	ofTranslate(ofGetWidth()/2,0); //center		
+	ofScale(scale_,scale_);		
+		if(_stage==PDETECT || _stage==PANALYSIS) _fruit_rain.draw();				
 	ofPopMatrix();
-	_img_frame.draw(0,0,ofGetWidth(),ofGetHeight());
 
+	ofPushMatrix();
+	ofTranslate(ofGetWidth()/2-ofGetHeight()/2,0); //left-top
+	ofScale(scale_,scale_);		
+		_scene[_stage]->draw();			
+	ofPopMatrix();
+	
+	float w_=ofGetHeight()/(float)WIN_HEIGHT*WIN_WIDTH;
+	_img_frame.draw(ofGetWidth()/2-w_/2,0,w_,ofGetHeight());
+
+	float margin_=(ofGetWidth()-w_)/2;
+	if(margin_>0){
+		ofPushStyle();
+		ofSetColor(13,104,171);
+			ofDrawRectangle(0,0,margin_,ofGetHeight());
+			ofDrawRectangle(ofGetWidth()-margin_,0,margin_,ofGetHeight());
+		ofPopStyle();
+	}
+	ofPopMatrix();
+
+	
 #ifdef DRAW_DEBUG
 	ofPushStyle();
 	ofSetColor(255,0,0);
+	
 	ofDrawBitmapString("fps= "+ofToString(ofGetFrameRate()),ofGetWidth()-100,10);
 	ofPopStyle();
 #endif
@@ -524,6 +544,7 @@ void ofApp::createFruitImage(){
 		
 		_fruit_rain.setFruit(x);
 		_fruit_rain.start();
+		_fruit_rain.update(1000);
 
 		for(int i=0;i<GIF_LENGTH*GIF_FPS;++i){
 			_fbo_save.begin();

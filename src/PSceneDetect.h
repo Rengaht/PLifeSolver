@@ -39,7 +39,7 @@ public:
 		ofAddListener(_timer_count.finish_event,this,&PSceneDetect::onTimerCountFinish);
 		ofAddListener(_timer_in[1].finish_event,this,&PSceneDetect::onSceneInFinish);
 
-		_glow=PGlowLine(540,915,200,150,30);
+		_glow=PGlowLine(WIN_HEIGHT/2,915,200,150,30);
 	}
 	void drawLayer(int i){
 		switch(i){

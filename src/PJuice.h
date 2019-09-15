@@ -7,10 +7,14 @@
 #define DROP_VEL 0
 #define DROP_ACC .5
 
+#define MJUICE_ROW 5
+#define JUICE_INTERVAL 3000
+#define JUICE_MOVE_INTERVAL 1000
+
 #define JUICE_RESOLUTION 150
-#define JUICE_WAVE_COUNT 3
-#define JUICE_WAVE_AMP 0.2
-#define JUICE_DROP_INTERVAL 1000
+#define JUICE_WAVE_COUNT 4
+#define JUICE_WAVE_AMP 0.1
+#define JUICE_DROP_INTERVAL 500
 
 
 
@@ -28,8 +32,7 @@ public:
     PDrop(ofColor col_,float hei_){
         _color=col_;
 
-        float w_=ofGetHeight();
-        _pos=ofVec2f(w_/2,-_size.y*1.5);
+        _pos=ofVec2f(0,-_size.y*1.5);
         //_size=ofVec2f(w_/15,w_/10);
         
         _hei=hei_;
@@ -82,7 +85,7 @@ public:
 class PJuice{
     
     //ofColor _color;
-    FrameTimer _timer_fill,_timer_move,_timer_drop;
+    FrameTimer _timer_fill,_timer_move_wave,_timer_drop,_timer_move;
     
     //ofMesh _mesh;
     ofVec2f _pos,_size;
@@ -95,21 +98,22 @@ public:
 
 
     PJuice(){
-        _pos=ofVec2f(0,ofGetHeight());
+        _pos=ofVec2f(-WIN_HEIGHT/2,WIN_HEIGHT);
         
-        _timer_fill=FrameTimer(FRUIT_GROUP_INTERVAL);
-//        _timer_fill.setContinuous(true);
+        _timer_fill=FrameTimer(JUICE_INTERVAL);
         _timer_fill.restart();
         
         _timer_drop=FrameTimer(JUICE_DROP_INTERVAL);
-//        _timer_drop.setContinuous(true);
         _timer_drop.restart();
         
-        _timer_move=FrameTimer(FRUIT_RAIN_INTERVAL*4);
-        _timer_move.setContinuous(true);
-        _timer_move.restart();
-        
-        _size=ofVec2f(ofGetHeight(),ofGetHeight()/8);
+		_timer_move_wave=FrameTimer(JUICE_MOVE_INTERVAL);
+		_timer_move_wave.setContinuous(true);
+		_timer_move_wave.restart();
+
+        _timer_move=FrameTimer(JUICE_INTERVAL*.4);
+       
+
+        _size=ofVec2f(WIN_HEIGHT,WIN_HEIGHT/MJUICE_ROW);
     }
     void reset(){
         _mwave=0;
@@ -122,14 +126,16 @@ public:
         _timer_fill.restart();
         _mwave++;
         
-        if(_mwave>8) _timer_move.restart();
+        if(_mwave>MJUICE_ROW-1){
+			_timer_move.restart();
+		}
     }
     void draw(){
         ofPushStyle();
         
         ofPushMatrix();
         ofTranslate(_pos);
-        if(_mwave>8) ofTranslate(0,_size.y*(max(_mwave-9,0)+_timer_move.valEaseOut()));
+        ofTranslate(0,_size.y*_timer_move.valEaseOut());
         
         list<ofPoint> tmp_;
         tmp_.push_back(ofPoint(0,_size.y));
@@ -138,7 +144,7 @@ public:
         auto it_color=_color.begin();
         
         for(int x=0;x<_mwave;++x){
-            
+            			
             ofSetColor(*it_color);
             
 //            ofTranslate(0,-_size.y);
@@ -151,8 +157,8 @@ public:
             
                 float len_=_size.x/(float)JUICE_RESOLUTION;
                 float ang_=TWO_PI*JUICE_WAVE_COUNT/(float)JUICE_RESOLUTION;
-                float start_ang_=(_timer_move.num()+_timer_move.valEaseInOut())*TWO_PI*(x%2==0?1:-1);
-                float h_=(x==_mwave-1)?_size.y*(_timer_fill.valEaseInOut()):_size.y;
+                float start_ang_=(_timer_move_wave.valEaseInOut())*TWO_PI*(x%2==0?1:-1);
+                float h_=(x==_mwave-1)?_size.y*(_timer_fill.valEaseOut()):_size.y;
             
                 for(int i=0;i<=JUICE_RESOLUTION;++i){
                     ofPoint pt_(i*len_,-_size.y*x-h_+sin(start_ang_+ang_*i)*_size.y*JUICE_WAVE_AMP);
@@ -173,7 +179,17 @@ public:
     }
     void update(float dt_){
         _timer_fill.update(dt_);
-        _timer_move.update(dt_);
+        
+		_timer_move_wave.update(dt_);
+
+		_timer_move.update(dt_);
+		if(_timer_move.val()==1){
+			//_pos.y+=_size.y;
+			_timer_move.reset();
+			_color.pop_front();
+			_mwave--;
+		}
+
         _timer_drop.update(dt_);
         
         for(auto& d:_drop) d.update(dt_);
