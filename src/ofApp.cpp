@@ -77,7 +77,6 @@ void ofApp::update(){
 	}
 
 	if(_face_analysis_ready){
-		createShareImage();
 		_face_analysis_ready=false;
 	}
 
@@ -92,8 +91,10 @@ void ofApp::draw(){
 	ofPushMatrix();
 	float cam_scale=(float)ofGetHeight()/_camera.getHeight();
 	float cam_wid=_camera.getWidth()*cam_scale;
+	ofTranslate(ofGetWidth()/2-cam_wid/2,0);
+	ofScale(cam_scale,cam_scale);
 		
-		_camera.draw(ofGetWidth()/2-cam_wid/2,0,cam_wid,ofGetHeight());
+		_camera.draw(_camera.getWidth(),0,-_camera.getWidth(),_camera.getHeight());
 		if(!_camera_paused && _stage>PSLEEP) drawFaceFrame();
 		
 	ofPopMatrix();
@@ -104,11 +105,11 @@ void ofApp::draw(){
 
 	ofPushMatrix();
 	
-	ofPushMatrix();
-	ofTranslate(ofGetWidth()/2,0); //center		
-	ofScale(scale_,scale_);		
-		if(_stage==PDETECT || _stage==PANALYSIS) _fruit_rain.draw();				
-	ofPopMatrix();
+	//ofPushMatrix();
+	//ofTranslate(ofGetWidth()/2,0); //center		
+	//ofScale(scale_,scale_);		
+	//	if(_stage==PDETECT || _stage==PANALYSIS) _fruit_rain.draw();				
+	//ofPopMatrix();
 
 	ofPushMatrix();
 	ofTranslate(ofGetWidth()/2-ofGetHeight()/2,0); //left-top
@@ -160,13 +161,6 @@ void ofApp::keyPressed(int key){
 			break;
 		case 'g':
 			//createFruitImage();
-			_user_id="mm2019-09-15-17-04-44-621";
-			cmd="\"C:\\ffmpeg\\bin\\ffmpeg.exe\" -y -framerate 12 -i "+ofToDataPath("tmp")+"\\"+_user_id+"_%4d.png"
-						+" -i "+ofToDataPath("juice")+"\\"+ofToString(2)+"\\%4d.png"
-						+" -filter_complex \"[0][1]overlay=shortest=1[tmp];[tmp]reverse,fifo [r];[0][1]overlay=shortest=1[tmp2]; [tmp2][r] concat=n=2:v=1 [v]\" -map \"[v]\" "
-						+ofToDataPath("output/")+_user_id+".gif";
-			ofLog()<<cmd;
-			ofSystem(cmd);
 			break;
 	}
 }
@@ -234,16 +228,21 @@ void ofApp::setStage(PStage set_){
 		case PDETECT:
 			createUserID();
 			_fruit_rain.reset();
-			_fruit_rain.start();
 			break;
         case PANALYSIS:
 			setCameraPause(true);
+			//_fruit_rain.reset();
             _fruit_rain.setSlow(false);
+			_fruit_rain.start();	
             break;
         case PRESULT:
-            _fruit_rain.stop();
+			_fruit_rain.reset();
+			_fruit_rain.setAutoFruit(false);
+			_fruit_rain.setFruit(_idx_user_juice);            
+			_fruit_rain.start();			
             break;
 		case PSLEEP:
+			_fruit_rain.stop();
 			setCameraPause(false);
 			break;
 	}
@@ -292,13 +291,11 @@ void ofApp::drawFaceFrame(){
         //ofDrawRectangle(_finder.getObject(i));
 
         auto rec_=_finder.getObject(i);
-        
+        auto p_=rec_.getPosition();
         ofSetColor(238,216,152);
-        ofPushMatrix();
-		/*ofTranslate(CAM_WIDTH,0);
-		ofScale(-1,1);*/
-        ofTranslate(rec_.getPosition());
-			ofDrawRectangle(0,0,rec_.getWidth(),rec_.getHeight());
+        ofPushMatrix();	
+        ofTranslate(_camera.getWidth()-p_.x,p_.y);
+			ofDrawRectangle(0,0,-rec_.getWidth(),rec_.getHeight());
         ofPopMatrix();
     }
     ofPopStyle();
@@ -376,7 +373,7 @@ void ofApp::urlResponse(ofxHttpResponse &resp_){
     }
 
 	if(resp_.url.find("azure.com")!=-1){
-        ofLog()<<"receive: "<<resp_.responseBody;
+        //ofLog()<<"receive: "<<resp_.responseBody;
         parseFaceData(resp_.responseBody);
         
         if(_stage==PANALYSIS){
@@ -388,7 +385,7 @@ void ofApp::urlResponse(ofxHttpResponse &resp_){
 	}else if(resp_.url.find("mmlab.com.tw")!=-1){
 		ofxJSONElement json_;
         json_.parse(resp_.responseBody);
-		ofLog()<<resp_.responseBody;
+		//ofLog()<<resp_.responseBody;
 
         if(json_["result"]=="success"){
 			createQRcode(json_["url"].asString());
@@ -522,32 +519,6 @@ void ofApp::saveCameraFrame(){
 	//ofSaveImage(pix,"raw/"+_user_id+".png");
 
 }
-void ofApp::createShareImage(){
-	ofLog()<<"Create Share Image !!!";
-	
-	//_idx_record=0;
-	//_recorder.setPrefix(ofToDataPath("tmp/"+_user_id+"_"));
-	//_recorder.setUserID(_user_id);
-
-	//ofImage img_;
-	//img_.load("raw/"+_user_id+".png");
-
-	//
-	//for(int i=0;i<GIF_LENGTH*GIF_FPS;++i){
-	//	_fbo_save.begin();
-	//	ofClear(255);
-	//		img_.draw(0,0);
-
-	//		//TODO: add fruit rain!!!
-
-	//	_fbo_save.end();
-
-	//	ofPixels pix;
-	//	_fbo_save.readToPixels(pix);
-	//	_recorder.addFrame(pix);
-	//}
-
-}
 void ofApp::createFruitImage(){
 
 	ofLog()<<"Create Fruit Image !!!";
@@ -568,7 +539,7 @@ void ofApp::createFruitImage(){
 				ofPushMatrix();
 				ofTranslate((float)GIF_HEIGHT/2,0);
 				ofScale((float)GIF_HEIGHT/WIN_HEIGHT,(float)GIF_HEIGHT/WIN_HEIGHT);
-					_fruit_rain.draw();
+					_fruit_rain.draw(1);
 				ofPopMatrix();
 				_img_share_frame.draw(0,0);
 				_img_share_text[x].draw(0,0,_fbo_save.getWidth(),_fbo_save.getHeight());

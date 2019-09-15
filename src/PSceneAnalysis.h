@@ -25,6 +25,8 @@ public:
 		
 		setup();
 
+		_timer_out[0]=FrameTimer(5000);
+
 		ofAddListener(_timer_in[0].finish_event,this,&PSceneAnalysis::onSceneInFinish);
 		ofAddListener(_timer_hint.finish_event,this,&PSceneAnalysis::onTimerHintFinish);
 
@@ -35,6 +37,8 @@ public:
 	void drawLayer(int i){
 		switch(i){
 			case 0:
+				_ptr_app->_fruit_rain.draw(1.0-_timer_out[0].valEaseInOut());
+
 				ofPushStyle();
 				ofSetColor(255,255*_timer_hint.valFade()*getLayerAlpha(0));
 					_img_hint[_idx_hint].draw(0,0,WIN_HEIGHT,WIN_HEIGHT);

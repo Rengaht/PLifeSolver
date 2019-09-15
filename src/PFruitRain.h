@@ -48,8 +48,11 @@ public:
 
 		//if(ofRandom(25)<1) _acc.x+=ofRandom(-.01,.01)*FRUIT_ACC;
 	}
-	void draw(){
+	void draw(float alpha_){
+		
 		ofPushStyle();
+		ofSetColor(255,255*alpha_);
+
 		ofPushMatrix();
 		ofTranslate(_pos);
 		
@@ -163,13 +166,15 @@ public:
 				if(_slow && ofRandom(2)<1)  continue;
 				if(!_slow && ofRandom(5)<1) continue;
 
-				_fruit.push_back(PFruit(&(*it),ofVec2f(-WIN_HEIGHT/2+(i)*grid_-FRUIT_BORDER+(j%2==0?-fw_:0),
+				_fruit.push_back(PFruit(&(*it),ofVec2f((i)*grid_-FRUIT_BORDER+(j%2==0?-fw_:0),
 												-(fh_*FRUIT_SCALE)*(j+(j+1)*.2)),(ofRandom(2)<1?45:-45)));
 			}
 		}
 	}
 
 	void update(float dt_){
+
+		if(!_playing) return;
 
 		for(auto& f:_fruit) f.update(_vel_drop);
 		_fruit.erase(remove_if(_fruit.begin(),_fruit.end(),
@@ -194,10 +199,16 @@ public:
 	}
 	
 
-	void draw(){
+	void draw(float alpha_){
 		
-		for(auto& f:_fruit) f.draw();
-		if(!_slow) _juice.draw();
+		for(auto& f:_fruit) f.draw(alpha_);
+
+		if(!_slow){
+			ofPushMatrix();
+			ofTranslate(WIN_HEIGHT/2,0);
+				_juice.draw(alpha_);
+			ofPopMatrix();
+		}
 	}
 	/*void onRainFinish(int &e){
 		addNewFruit();

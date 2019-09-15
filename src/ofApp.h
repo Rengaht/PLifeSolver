@@ -79,6 +79,8 @@ class ofApp : public ofBaseApp{
 		void createUserID();
 
 		
+		PFruitRain _fruit_rain;
+		
 
 		bool _recording;
 		FrameTimer _timer_record;
@@ -88,7 +90,6 @@ class ofApp : public ofBaseApp{
 		/* share */
 		bool _face_analysis_ready;
 		
-		void createShareImage();
 		void uploadImage(string id_);
 		void createQRcode(string url_);
 		ofxQRCodeGenerator _qrcode_gen;
@@ -126,8 +127,6 @@ class ofApp : public ofBaseApp{
 		void onRecordTimerFinish(int &e);
 
 
-		PFruitRain _fruit_rain;
-		
 
 		void createFruitImage();
 };

@@ -20,7 +20,7 @@ class PSceneResult:public SceneBase{
 	ofImage _img_number[10];
 public:
 	PSceneResult(ofApp* set_):SceneBase(set_){
-		_mlayer=4;
+		_mlayer=5;
 		_order_scene=4;
 
 		_timer_scan=FrameTimer(QRCODE_TIME);
@@ -36,10 +36,10 @@ public:
 		for(int i=0;i<10;++i) _img_number[i].loadImage("_img_ui/result_count/"+ofToString(i)+".png");
 
 		setup();
-		_timer_in[0]=FrameTimer(EASE_DUE,CARD_TIME*.5);
-		_timer_in[1]=FrameTimer(EASE_DUE,CARD_TIME*1.5);
-		_timer_in[2]=FrameTimer(EASE_DUE,CARD_TIME*2.5);
+		_timer_in[1]=FrameTimer(EASE_DUE,CARD_TIME*.3);
+		_timer_in[2]=FrameTimer(EASE_DUE,CARD_TIME*1.5);
 		_timer_in[3]=FrameTimer(EASE_DUE,CARD_TIME*2.5);
+		_timer_in[4]=FrameTimer(EASE_DUE,CARD_TIME*2.5);
 
 
 
@@ -53,12 +53,20 @@ public:
 		int num_=ofClamp(QRCODE_TIME/1000-_num_count,0,QRCODE_TIME/1000);
 		switch(i){
 			case 0:
+				_ptr_app->_fruit_rain.draw(getLayerAlpha(0));
+				ofPushStyle();
+				ofSetColor(0,160*getLayerAlpha(i));
+					ofDrawRectangle(0,0,WIN_HEIGHT,WIN_HEIGHT);
+				ofPopStyle();
+				break;
+			case 1:
+				
 				_img_question[_ptr_app->_idx_user_juice].draw(0,0,WIN_HEIGHT,WIN_HEIGHT);
                 break;
-			case 1:
+			case 2:
                 _img_solution[_ptr_app->_idx_user_juice].draw(0,0,WIN_HEIGHT,WIN_HEIGHT);
                 break;
-			case 2:
+			case 3:
                 _img_takeaway.draw(0,0,WIN_HEIGHT,WIN_HEIGHT);
                 ofPushStyle();
                 //ofSetColor(255,255*ofClamp(1.0-_timer_count.val(),0,1)*getLayerAlpha(0));
@@ -66,7 +74,7 @@ public:
 					_img_number[(int)ofClamp(num_%10,0,9)].draw(314,797);
                 ofPopStyle();
                 break;
-			case 3:
+			case 4:
 				_img_qrcode.draw(0,0,WIN_HEIGHT,WIN_HEIGHT);
 				ofPushMatrix();
 				ofTranslate(682,704);

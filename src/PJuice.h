@@ -40,9 +40,9 @@ public:
         _vel=ofVec2f(0,DROP_VEL);
         _acc=ofVec2f(0,DROP_ACC);
     }
-    void draw(){
+    void draw(float alpha_){
         ofPushStyle();
-        ofSetColor(_color);
+        ofSetColor(_color,180*alpha_);
 
 		
         ofPushMatrix();
@@ -92,6 +92,8 @@ class PJuice{
     int _mwave;
     list<ofColor> _color;
     list<PDrop> _drop;
+	
+	FrameTimer _timer_fade_in,_timer_fade_out;
     
 public:
 	
@@ -130,8 +132,9 @@ public:
 			_timer_move.restart();
 		}
     }
-    void draw(){
+    void draw(float alpha_){
         ofPushStyle();
+		
         
         ofPushMatrix();
         ofTranslate(_pos);
@@ -145,7 +148,7 @@ public:
         
         for(int x=0;x<_mwave;++x){
             			
-            ofSetColor(*it_color);
+            ofSetColor(*it_color,alpha_*180);
             
 //            ofTranslate(0,-_size.y);
             ofBeginShape();
@@ -173,7 +176,7 @@ public:
         
         ofPopMatrix();
         
-        for(auto& d:_drop) d.draw();
+        for(auto& d:_drop) d.draw(alpha_);
         
         ofPopStyle();
     }
@@ -199,7 +202,7 @@ public:
         }
         _drop.erase(remove_if(_drop.begin(),_drop.end(),
                                [&](PDrop p)->bool {return p.isDead();}),_drop.end());
-        
+        		
     }
     
 };

@@ -63,7 +63,7 @@ public:
 					
 					counter=0;
 					_save_count=0;
-					string cmd="\"C:\\ffmpeg\\bin\\ffmpeg.exe\"  -y -framerate 12 -i "+ofToDataPath("tmp/")+_user_id+"_%4d.png"
+					string cmd="ffmpeg -y -framerate 12 -i "+ofToDataPath("tmp/")+_user_id+"_%4d.png"
 						+" -i "+ofToDataPath("juice/")+ofToString(_juice_id+1)+"/%4d.png"
 						+" -filter_complex \"[0][1]overlay=shortest=1[tmp];[tmp]reverse,fifo [r];[0][1]overlay=shortest=1[tmp2]; [tmp2][r] concat=n=2:v=1 [v]\" -map \"[v]\" "
 						+ofToDataPath("output/")+_user_id+".gif";
