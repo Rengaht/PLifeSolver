@@ -34,8 +34,9 @@ $RECYCLE.BIN/
 *.exp
 *.opendb
 *.db
-
+*.gif
 bin/data/raw
 bin/data/tmp
 bin/data/output
+bin/data/juice
 .vs

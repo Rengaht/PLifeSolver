@@ -10,9 +10,9 @@
 #define FRUIT_COUNT 18
 #define MJUICE_RESULT 8
 
-#define GIF_FPS 15
+#define GIF_FPS 12
 #define GIF_HEIGHT 700
-#define GIF_LENGTH 2
+#define GIF_LENGTH 5
 
 #include "ofMain.h"
 

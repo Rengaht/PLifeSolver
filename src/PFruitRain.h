@@ -177,6 +177,10 @@ public:
 
 		_juice.update(dt_);
 
+		if(!_slow){
+			if(_vel_drop<FRUIT_VEL*2) _vel_drop+=.5;
+		}
+
 		//check if need new fruit
 		if(_fruit.size()>0 && _fruit.back().isDropped()){
 			if(_auto_fruit){
@@ -201,8 +205,7 @@ public:
 	void setSlow(bool set_){
         _slow=set_;
         if(!set_){
-            _juice.addWave(ofColor(_color[_idx_group],120));
-			_vel_drop=FRUIT_VEL*2;
+            _juice.addWave(ofColor(_color[_idx_group],120));			
         }
     }
 

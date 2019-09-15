@@ -62,6 +62,7 @@ public:
 		SceneBase::update(dt_);
 
 		_timer_count.update(dt_);
+
 		_glow.update(dt_);
 	}
 
@@ -75,14 +76,16 @@ public:
 		_num_count++;
 		if(_num_count<5){
 			_timer_count.restart();
-			if(_num_count==RECORD_TIME_START) _ptr_app->setRecord(true);
+			//if(_num_count==RECORD_TIME_START) _ptr_app->setRecord(true);
 		}else{
-			//_ptr_app->setRecord(false);
+			_ptr_app->setRecord(false);
 			_ptr_app->prepareScene(ofApp::PANALYSIS);			
 		}
 	}
 	void onSceneInFinish(int &e){
 		_timer_count.restart();
+		
+		_ptr_app->setRecord(true);
 	}
 };
 

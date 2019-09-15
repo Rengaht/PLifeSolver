@@ -123,7 +123,7 @@ public:
 	}
 
 	void onTimerConfirmFinish(int &e){		 
-		//_ptr_app->prepareScene(ofApp::PAUTH);			 		
+		_ptr_app->prepareScene(ofApp::PAUTH);			 		
 	}
 };
 

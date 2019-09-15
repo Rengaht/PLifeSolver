@@ -73,7 +73,7 @@ void ofApp::update(){
 			//_contour_finder.findContours(_camera);	
 			//drawContour();
 		}		
-		//_timer_record.update(dt_);
+		if(_recording) _timer_record.update(dt_);
 	}
 
 	if(_face_analysis_ready){
@@ -90,10 +90,10 @@ void ofApp::update(){
 void ofApp::draw(){
 
 	ofPushMatrix();
-	//ofTranslate(ofGetWidth(),0);
-	//ofScale(-1,0);
+	float cam_scale=(float)ofGetHeight()/_camera.getHeight();
+	float cam_wid=_camera.getWidth()*cam_scale;
 		
-		_camera.draw(0,0,CAM_WIDTH,CAM_HEIGHT);
+		_camera.draw(ofGetWidth()/2-cam_wid/2,0,cam_wid,ofGetHeight());
 		if(!_camera_paused && _stage>PSLEEP) drawFaceFrame();
 		
 	ofPopMatrix();
@@ -142,6 +142,9 @@ void ofApp::draw(){
 
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key){
+
+	string cmd;
+
 	switch(key){
 		case 'f':
 		case 'F':
@@ -156,7 +159,14 @@ void ofApp::keyPressed(int key){
 			uploadImage("test");
 			break;
 		case 'g':
-			createFruitImage();
+			//createFruitImage();
+			_user_id="mm2019-09-15-17-04-44-621";
+			cmd="\"C:\\ffmpeg\\bin\\ffmpeg.exe\" -y -framerate 12 -i "+ofToDataPath("tmp")+"\\"+_user_id+"_%4d.png"
+						+" -i "+ofToDataPath("juice")+"\\"+ofToString(2)+"\\%4d.png"
+						+" -filter_complex \"[0][1]overlay=shortest=1[tmp];[tmp]reverse,fifo [r];[0][1]overlay=shortest=1[tmp2]; [tmp2][r] concat=n=2:v=1 [v]\" -map \"[v]\" "
+						+ofToDataPath("output/")+_user_id+".gif";
+			ofLog()<<cmd;
+			ofSystem(cmd);
 			break;
 	}
 }
@@ -210,7 +220,7 @@ void ofApp::prepareScene(PStage set_){
 
 	switch(set_){
 		case PANALYSIS:
-			saveCameraFrame();
+			//saveCameraFrame();
 			break;
 	}
 
@@ -343,7 +353,7 @@ void ofApp::sendFaceRequest(){
     tmp_.setFromPixels(_camera.getPixels().getData(),_camera.getWidth(),_camera.getHeight(),OF_IMAGE_COLOR);
     tmp_.mirror(false, true);
     tmp_.save("raw/"+_user_id+".jpg");*/
-    ofBuffer data_=ofBufferFromFile("raw/"+_user_id+".png",true);
+    ofBuffer data_=ofBufferFromFile("tmp/"+_user_id+"_0000.png",true);
 
 	ofxHttpForm form_;
     form_.action=url_;
@@ -479,58 +489,63 @@ void ofApp::drawOutFrame(){
 void ofApp::setRecord(bool set_){
 	_recording=set_;
 	if(set_){
-		/*_idx_record=0;
+		_idx_record=0;
 		_recorder.setPrefix(ofToDataPath("tmp/"+_user_id+"_"));
-		_recorder.setUserID(_user_id);*/
+		_recorder.setUserID(_user_id);
 		
-		//_timer_record.restart();
+		_timer_record.restart();
 
 		//_recorder.startThread();
-		ofSystem("DEL /F/Q "+ofToDataPath("tmp\\")+"*.jpg");
+		ofSystem("DEL /F/Q "+ofToDataPath("tmp\\")+"*.png");
 
 		ofLog()<<"start recording.... "<<ofGetElapsedTimeMillis();
 	}else{
-		//_timer_record.stop();
+		_timer_record.stop();
 		ofLog()<<"end recording..."<<ofGetElapsedTimeMillis()<<" #fr= "<<_idx_record;
 	}
 }
 void ofApp::saveCameraFrame(){
+	float scale_=(float)GIF_HEIGHT/(float)CAM_HEIGHT;
+	float w_=(float)CAM_WIDTH*scale_;
+
 	_fbo_save.begin();
 	ofClear(255);
-		_camera.draw(GIF_HEIGHT/2-_camera.getWidth()/2,GIF_HEIGHT/2-_camera.getHeight()/2);		
+		_camera.draw(GIF_HEIGHT/2-w_/2,0,w_,GIF_HEIGHT);		
 	_fbo_save.end();
 	
 
 	ofPixels pix;	
     _fbo_save.readToPixels(pix);	
 	pix.mirror(false,true);
-	ofSaveImage(pix,"raw/"+_user_id+".png");
+
+	_recorder.addFrame(pix);
+	//ofSaveImage(pix,"raw/"+_user_id+".png");
 
 }
 void ofApp::createShareImage(){
 	ofLog()<<"Create Share Image !!!";
 	
-	_idx_record=0;
-	_recorder.setPrefix(ofToDataPath("tmp/"+_user_id+"_"));
-	_recorder.setUserID(_user_id);
+	//_idx_record=0;
+	//_recorder.setPrefix(ofToDataPath("tmp/"+_user_id+"_"));
+	//_recorder.setUserID(_user_id);
 
-	ofImage img_;
-	img_.load("raw/"+_user_id+".png");
+	//ofImage img_;
+	//img_.load("raw/"+_user_id+".png");
 
-	
-	for(int i=0;i<GIF_LENGTH*GIF_FPS;++i){
-		_fbo_save.begin();
-		ofClear(255);
-			img_.draw(0,0);
+	//
+	//for(int i=0;i<GIF_LENGTH*GIF_FPS;++i){
+	//	_fbo_save.begin();
+	//	ofClear(255);
+	//		img_.draw(0,0);
 
-			//TODO: add fruit rain!!!
+	//		//TODO: add fruit rain!!!
 
-		_fbo_save.end();
+	//	_fbo_save.end();
 
-		ofPixels pix;
-		_fbo_save.readToPixels(pix);
-		_recorder.addFrame(pix);
-	}
+	//	ofPixels pix;
+	//	_fbo_save.readToPixels(pix);
+	//	_recorder.addFrame(pix);
+	//}
 
 }
 void ofApp::createFruitImage(){
@@ -538,31 +553,34 @@ void ofApp::createFruitImage(){
 	ofLog()<<"Create Fruit Image !!!";
 	
 	for(int x=0;x<MJUICE_RESULT;++x){
-		
+			
 		_fruit_rain.reset();
 		_fruit_rain.setAutoFruit(false);	
 		
 		_fruit_rain.setFruit(x);
 		_fruit_rain.start();
-		_fruit_rain.update(1000);
+		for(int i=0;i<180;++i)
+			_fruit_rain.update(16);
 
 		for(int i=0;i<GIF_LENGTH*GIF_FPS;++i){
 			_fbo_save.begin();
 			ofClear(255);
 				ofPushMatrix();
+				ofTranslate((float)GIF_HEIGHT/2,0);
 				ofScale((float)GIF_HEIGHT/WIN_HEIGHT,(float)GIF_HEIGHT/WIN_HEIGHT);
-				ofTranslate(-FRUIT_BORDER,0);			
 					_fruit_rain.draw();
 				ofPopMatrix();
 				_img_share_frame.draw(0,0);
-				_img_share_text[_idx_user_juice].draw(0,0,_fbo_save.getWidth(),_fbo_save.getHeight());
+				_img_share_text[x].draw(0,0,_fbo_save.getWidth(),_fbo_save.getHeight());
 			_fbo_save.end();
 
 			ofPixels pix;
 			_fbo_save.readToPixels(pix);
 			ofSaveImage(pix,"juice/"+ofToString(x+1)+"/"+ofToString(i,4,'0')+".png");
 
-			_fruit_rain.update(1000/(float)GIF_FPS*10);
+			for(int i=0;i<12;++i)
+				_fruit_rain.update(16);
+			//_fruit_rain.update(1000/(float)GIF_FPS*20);
 		}
 	}
 }

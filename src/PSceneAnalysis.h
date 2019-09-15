@@ -57,7 +57,7 @@ public:
 		_timer_hint.restart();
 	}
 	void onSceneInFinish(int &e){
-		//_ptr_app->sendFaceRequest();
+		_ptr_app->sendFaceRequest();
 	}
 	void onTimerHintFinish(int &e){
 		

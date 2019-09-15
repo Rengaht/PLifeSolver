@@ -63,20 +63,12 @@ public:
 					
 					counter=0;
 					_save_count=0;
-					//stopThread();
-					string cmd="\"C:\\Program Files\\ImageMagick-7.0.8-Q16\\magick.exe\" "+ofToDataPath("tmp/")+"*.png "
-							+"-reverse "+ofToDataPath("tmp/")+"*.png -loop 0 "
-							+ofToDataPath("output/")+_user_id+".gif";
-					//ofLog()<<cmd;
+					string cmd="\"C:\\ffmpeg\\bin\\ffmpeg.exe\"  -y -framerate 12 -i "+ofToDataPath("tmp/")+_user_id+"_%4d.png"
+						+" -i "+ofToDataPath("juice/")+ofToString(_juice_id+1)+"/%4d.png"
+						+" -filter_complex \"[0][1]overlay=shortest=1[tmp];[tmp]reverse,fifo [r];[0][1]overlay=shortest=1[tmp2]; [tmp2][r] concat=n=2:v=1 [v]\" -map \"[v]\" "
+						+ofToDataPath("output/")+_user_id+".gif";
+					ofLog()<<cmd;
 					ofSystem(cmd);
-
-					string cmd2="\"C:\\Program Files\\ImageMagick-7.0.8-Q16\\magick.exe\" convert "+ofToDataPath("output/")+_user_id+".gif"
-								+" -coalesce null: "+ofToDataPath("_img_ui/share/")+ofToString(_juice_id+1)+".png"
-								+" -gravity center -layers composite -layers optimize "
-								+ofToDataPath("output/")+_user_id+".gif";
-					ofLog()<<cmd2;
-					ofSystem(cmd2);
-
 					ofNotifyEvent(recordFinish,counter,this);
 				}
 			}
