@@ -13,8 +13,7 @@
 #include "ofMain.h"
 #include "FrameTimer.h"
 #include "PJuice.h"
-
-
+#include "Parameter.h"
 
 class PFruit{
 
@@ -26,7 +25,7 @@ public:
 	ofVec2f _size;
 	bool _back;
 
-	PFruit(ofImage* img_,ofVec2f pos_,float ang_){
+	PFruit(ofImage* img_,ofVec2f pos_,float ang_,bool back_){
 		
 		//_index=idx_;
 		_img=img_;
@@ -36,7 +35,7 @@ public:
 		_pos=pos_;
 		_vel=ofVec2f(0,PParam::val()->FruitStartVel);
 
-		_back=ofRandom(2)<1;
+		_back=back_;
 		//_acc=ofVec2f(0,FRUIT_ACC);
 	}
 	void update(float dy_){
@@ -82,6 +81,8 @@ class PFruitRain{
 	float _vel_drop;
 
 public:
+	ofApp* _ptr_app;
+
 	static ofColor _color[];
 	list<int> _idx_fruit[FRUIT_GROUP];
 	list<ofImage> _img_fruit[FRUIT_GROUP];
@@ -90,9 +91,10 @@ public:
 	bool _playing;
 	bool _slow;
 	bool _auto_fruit;
+	list<ofRectangle>* _rect_contour;
 
 	PFruitRain(){
-		
+
 		loadImage();
 
 		reset();
@@ -153,6 +155,8 @@ public:
 	}
 	void addFruit(int index_){
 
+		if(_idx_group<0) return;
+
 		float grid_=(ofGetHeight()+FRUIT_BORDER*2)/(float)PParam::val()->FruitDensity;
 		
 		auto it=_img_fruit[_idx_group].begin();
@@ -165,8 +169,14 @@ public:
 				if(_slow && ofRandom(2)<1)  continue;
 				if(!_slow && ofRandom(5)<1) continue;
 
-				_fruit.push_back(PFruit(&(*it),ofVec2f((i)*grid_-FRUIT_BORDER+(j%2==0?-fw_:0),
-												-(fh_*PParam::val()->FruitScale)*(j+(j+1)*.2)),(ofRandom(2)<1?45:-45)));
+				float x_=(i)*grid_-FRUIT_BORDER+(j%2==0?-fw_:0);
+				float sx_=(x_+WIN_WIDTH/2)*PParam::val()->BgdDetectScale;
+				bool in_=false;
+				for(auto& r:*_rect_contour){
+					if(x_>r.getLeft() && x_<r.getRight()) in_=true;
+				}
+				_fruit.push_back(PFruit(&(*it),ofVec2f(x_,
+												-(fh_*PParam::val()->FruitScale)*(j+(j+1)*.2)),(ofRandom(2)<1?45:-45),in_));
 			}
 		}
 	}

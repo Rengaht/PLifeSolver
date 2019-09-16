@@ -18,6 +18,7 @@ class PSceneAuth:public SceneBase{
 	ofImage _img_confirm;
 
 	PGlowLine _glow;
+	bool _sound_confirm_played;
 
 public:
 	PSceneAuth(ofApp* set_):SceneBase(set_){
@@ -74,6 +75,10 @@ public:
 		
 		_timer_hint.update(dt_);		
 		_timer_confirm.update(dt_);
+		if(!_sound_confirm_played && _timer_confirm.valEaseInOut()*3>2){
+			_sound_confirm_played=true;
+			_ptr_app->playSound(ofApp::PSound::SCHECK);
+		}
 
 		_glow.update(dt_);
 	}
@@ -81,20 +86,25 @@ public:
 	void init(){
 		SceneBase::init();
 		_num_timer=0;
+		_sound_confirm_played=false;
 	}
 
 	void onSceneInFinish(int &e){
 		_timer_hint.restart();
+		_ptr_app->playSound(ofApp::PSound::SCOUNT);
 	}
 	void onTimerHintFinish(int &e){
 		
 		_num_timer++;
-		if(_num_timer<3) _timer_hint.restart();		
-		else{
+		if(_num_timer<3){
+			_timer_hint.restart();		
+			_ptr_app->playSound(ofApp::PSound::SCOUNT);
+		}else{
 			_timer_confirm.restart();
 		}
 	}
 	void onTimerConfirmFinish(int &e){
+		
 		_ptr_app->prepareScene(ofApp::PDETECT);
 	}
 

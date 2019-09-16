@@ -91,8 +91,10 @@ public:
 		_num_count++;
 		if(_num_count<5){
 			_timer_count.restart();
+			_ptr_app->playSound(ofApp::PSound::SCOUNT);
 			if(_num_count==FRUIT_TIME_START) _ptr_app->_fruit_rain.start();			
 		}else{
+			_ptr_app->playSound(ofApp::PSound::SSHUTTER);
 			_ptr_app->setRecord(false);
 			_ptr_app->setCameraPause(true);
 			_ptr_app->_fruit_rain.stop();
@@ -106,6 +108,7 @@ public:
 		_timer_count.restart();
 		
 		_ptr_app->setRecord(true);
+		_ptr_app->playSound(ofApp::PSound::SCOUNT);
 	}
 };
 

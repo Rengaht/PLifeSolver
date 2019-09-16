@@ -50,11 +50,11 @@ void ofApp::setup(){
 	ofAddListener(_recorder.recordFinish,this,&ofApp::onRecorderFinish);
 	_recorder.startThread();
 
-	_fbo_contour.allocate(ofGetWidth(),ofGetHeight(),GL_LUMINANCE);
+	_fbo_contour.allocate(ofGetWidth(),ofGetHeight(),GL_RGB);
 		
 
 	_fbo_bgd_tmp.allocate(_camera.getWidth()*PParam::val()->BgdDetectScale,_camera.getHeight()*PParam::val()->BgdDetectScale,GL_RGB);
-	_fbo_threshold_tmp.allocate(_camera.getWidth(),_camera.getHeight(),GL_LUMINANCE);
+	_fbo_threshold_tmp.allocate(_camera.getWidth(),_camera.getHeight(),GL_RGB);
 	_fbo_bgd.allocate(_camera.getWidth(),_camera.getHeight(),GL_RGB);
 
 	_masker.setup(_camera.getWidth(),_camera.getHeight());
@@ -111,7 +111,6 @@ void ofApp::draw(){
 	if(!_camera_paused && _stage>PSLEEP) drawFaceFrame();
 	ofPopMatrix();
 
-	//_img_mask.draw(0,0);
 		
 	float scale_=ofGetHeight()/(float)WIN_HEIGHT;
 
@@ -175,6 +174,15 @@ void ofApp::draw(){
 	ofEndShape();
 	
 	ofPopMatrix();*/
+	ofNoFill();
+	float s_=1.0/PParam::val()->BgdDetectScale*cam_scale;
+	ofPushMatrix();
+	ofTranslate(ofGetWidth()/2-cam_wid/2,0);
+	ofScale(s_,s_);
+	for(auto& r_:_rect_contour){
+		ofDrawRectangle(r_.getLeft(),r_.getTop(),r_.getWidth(),r_.getHeight());
+	}
+	ofPopMatrix();
 
 	ofPopStyle();
 
@@ -201,6 +209,8 @@ void ofApp::updateBackground(){
 	_img_threshold.update();
 
 	_contour_finder.findContours(_img_threshold);
+	_rect_contour.clear();
+
 
 	_fbo_threshold_tmp.begin();
 	ofClear(0);
@@ -211,10 +221,14 @@ void ofApp::updateBackground(){
 		ofFill();
 		//ofSetColor(255,0,0);
 
+
 		auto pp=_contour_finder.getPolylines();
 		for(auto&p:pp){
 		//	if(rec_.intersects(p.getBoundingBox())){
-				
+				auto r_=p.getBoundingBox();
+				r_.x=_img_threshold.getWidth()-r_.x;
+				_rect_contour.push_back(r_);
+
 				ofPath p_;
 				p_.newSubPath();
 				p_.moveTo(p.getVertices()[0]);
@@ -222,6 +236,12 @@ void ofApp::updateBackground(){
 				p_.close();				
 				p_.simplify(2.0);				
 				p_.draw();
+
+				/*ofPushStyle();
+				ofSetColor(255,0,0);
+				ofNoFill();
+					ofDrawRectangle(p.getBoundingBox());
+				ofPopStyle();*/
 		//	}
 		}
 	
@@ -229,7 +249,10 @@ void ofApp::updateBackground(){
 		ofPopStyle();
 	ofPopMatrix();
 	_fbo_threshold_tmp.end();		
-			
+
+	_fruit_rain._rect_contour=&_rect_contour;
+
+
 	_fbo_bgd.begin();
 	ofClear(0);
 		_camera.draw(0,0);
@@ -340,6 +363,12 @@ void ofApp::loadScene(){
 	
 	_qrcode_gen.setColor(ofColor(238,216,152),ofColor(0,0,0,0));
 
+	_soundfx[0].loadSound("sound/check.wav");
+	_soundfx[1].loadSound("sound/count.wav");
+	_soundfx[2].loadSound("sound/finish.wav");
+	_soundfx[3].loadSound("sound/result.wav");
+	_soundfx[4].loadSound("sound/shutter.wav");
+
 }
 
 void ofApp::onSceneInFinish(int &e){
@@ -408,7 +437,7 @@ void ofApp::setupCamera(){
 
 	_contour_finder.setMinAreaRadius(_camera.getWidth()*PParam::val()->BgdDetectScale*.05);
 	_contour_finder.setMaxAreaRadius(_camera.getWidth()*PParam::val()->BgdDetectScale*.7);
-	_contour_finder.setThreshold(128);
+	_contour_finder.setThreshold(180);
 	_contour_finder.setSimplify(true);
 	_contour_finder.setFindHoles(false);
 
@@ -696,4 +725,8 @@ void ofApp::createQRcode(string url_){
 
 	_qrcode_gen.generate(url_);
 
+}
+
+void ofApp::playSound(PSound p_){
+	_soundfx[p_].play();
 }

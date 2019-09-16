@@ -23,6 +23,8 @@ class PSceneSleep:public SceneBase{
 
 	PGlowLine _glow;
 
+	bool _sound_confirm_played;
+
 public:
 	PSceneSleep(ofApp* set_):SceneBase(set_){
 		_mlayer=2;
@@ -82,11 +84,13 @@ public:
 		_glow.update(dt_);
 		
 		_timer_hint.update(dt_);
-		if(_timer_hint.val()==1){
-			
+		
+		_timer_confirm.update(dt_);
+		if(!_sound_confirm_played &&_timer_confirm.val()*5>2){
+			_sound_confirm_played=true;
+			_ptr_app->playSound(ofApp::PSound::SCHECK);
 		}
 
-		_timer_confirm.update(dt_);
 
 		 if(_ptr_app->faceFound()){
             if(_index_face_start<0){
@@ -95,7 +99,10 @@ public:
             }else{
                 if(!_confirm_face && _index_face_start>=FACE_DETECT_FRAME){
 					_confirm_face=true;				
-					_timer_confirm.restart();					
+					_timer_confirm.restart();		
+					
+					
+
 				}
 				_index_face_start+=dt_;
             }
@@ -115,6 +122,9 @@ public:
 		_confirm_face=false;
 		_timer_confirm.reset();
 		_timer_hint.restart();
+
+		_sound_confirm_played=false;
+
 	}
 	void onTimerHintFinish(int &e){
 		
@@ -122,7 +132,7 @@ public:
 		_timer_hint.restart();
 	}
 
-	void onTimerConfirmFinish(int &e){		 
+	void onTimerConfirmFinish(int &e){		
 		_ptr_app->prepareScene(ofApp::PAUTH);			 		
 	}
 };

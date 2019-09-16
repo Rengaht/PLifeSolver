@@ -42,6 +42,8 @@ public:
 		_timer_in[4]=FrameTimer(EASE_DUE,PParam::val()->CardTime*2.5);
 
 
+		ofAddListener(_timer_in[0].finish_event,this,&PSceneResult::onCardInFinish);
+		ofAddListener(_timer_in[1].finish_event,this,&PSceneResult::onCardInFinish);
 
 		ofAddListener(_timer_in[3].finish_event,this,&PSceneResult::onTimerSceneInFinish);
 		ofAddListener(_timer_scan.finish_event,this,&PSceneResult::onTimerScanFinish);
@@ -101,10 +103,14 @@ public:
 		_timer_count.reset();
 		_num_count=0;
 	}
-
+	void onCardInFinish(int &e){
+		_ptr_app->playSound(ofApp::PSound::SRESULT);
+	}
 	void onTimerSceneInFinish(int &e){
 		_timer_scan.restart();
 		_timer_count.restart();
+
+		_ptr_app->playSound(ofApp::PSound::SFINISH);
 	}
 	void onTimerScanFinish(int &e){
 		_ptr_app->prepareScene(ofApp::PSLEEP);

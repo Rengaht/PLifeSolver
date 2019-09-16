@@ -52,6 +52,9 @@ class ofApp : public ofBaseApp{
 		void onSceneOutFinish(int &e);
 		void prepareScene(PStage set_);
 
+		enum PSound {SCHECK,SCOUNT,SFINISH,SRESULT,SSHUTTER};
+		void playSound(PSound i);
+
 		/* camera & face */
 		void setupCamera();
 		void setCameraPause(bool set_);
@@ -88,6 +91,7 @@ class ofApp : public ofBaseApp{
 		
 		PFruitRain _fruit_rain;
 		void drawForeground();
+		list<ofRectangle> _rect_contour;
 
 		bool _recording;
 		FrameTimer _timer_record;
@@ -145,4 +149,6 @@ class ofApp : public ofBaseApp{
 
 
 		void createFruitImage();
+
+		ofSoundPlayer _soundfx[5];
 };
