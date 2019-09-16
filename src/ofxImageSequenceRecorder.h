@@ -59,13 +59,15 @@ public:
                 q.pop();           
 				_save_count++;
 				
-				if(counter==_save_count){
+				if(counter>0 && counter==_save_count){
 					
 					counter=0;
 					_save_count=0;
-					string cmd="ffmpeg -y -framerate 12 -i "+ofToDataPath("tmp/")+_user_id+"_%4d.png"
-						+" -i "+ofToDataPath("juice/")+ofToString(_juice_id+1)+"/%4d.png"
-						+" -filter_complex \"[0][1]overlay=shortest=1[tmp];[tmp]reverse,fifo [r];[0][1]overlay=shortest=1[tmp2]; [tmp2][r] concat=n=2:v=1 [v]\" -map \"[v]\" "
+					string cmd=PParam::val()->FFmpegCmd
+						+" -framerate "+ofToString(PParam::val()->GifFps)
+						+" -i "+ofToDataPath("tmp/")+_user_id+"_%4d.png"
+						+" -i "+ofToDataPath("juice/")+ofToString(_juice_id+1)+"/%4d.png "
+						+PParam::val()->FFmpegFilter+" "
 						+ofToDataPath("output/")+_user_id+".gif";
 					ofLog()<<cmd;
 					ofSystem(cmd);

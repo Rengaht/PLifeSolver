@@ -4,17 +4,17 @@
 
 #include "ofxSvg.h"
 
-#define DROP_VEL 0
-#define DROP_ACC .5
+//#define DROP_VEL 0
+//#define DROP_ACC .5
 
-#define MJUICE_ROW 5
-#define JUICE_INTERVAL 3000
+//#define MJUICE_ROW 5
+//#define JUICE_INTERVAL 3000
 #define JUICE_MOVE_INTERVAL 1000
 
 #define JUICE_RESOLUTION 150
 #define JUICE_WAVE_COUNT 4
 #define JUICE_WAVE_AMP 0.1
-#define JUICE_DROP_INTERVAL 500
+//#define JUICE_DROP_INTERVAL 500
 
 
 
@@ -37,8 +37,8 @@ public:
         
         _hei=hei_;
         
-        _vel=ofVec2f(0,DROP_VEL);
-        _acc=ofVec2f(0,DROP_ACC);
+        _vel=ofVec2f(0);
+        _acc=ofVec2f(0);
     }
     void draw(float alpha_){
         ofPushStyle();
@@ -102,20 +102,20 @@ public:
     PJuice(){
         _pos=ofVec2f(-WIN_HEIGHT/2,WIN_HEIGHT);
         
-        _timer_fill=FrameTimer(JUICE_INTERVAL);
+        _timer_fill=FrameTimer(PParam::val()->JuiceTime);
         _timer_fill.restart();
         
-        _timer_drop=FrameTimer(JUICE_DROP_INTERVAL);
+        _timer_drop=FrameTimer(PParam::val()->JuiceDropTime);
         _timer_drop.restart();
         
 		_timer_move_wave=FrameTimer(JUICE_MOVE_INTERVAL);
 		_timer_move_wave.setContinuous(true);
 		_timer_move_wave.restart();
 
-        _timer_move=FrameTimer(JUICE_INTERVAL*.4);
+        _timer_move=FrameTimer(PParam::val()->JuiceTime*.4);
        
 
-        _size=ofVec2f(WIN_HEIGHT,WIN_HEIGHT/MJUICE_ROW);
+        _size=ofVec2f(WIN_HEIGHT,WIN_HEIGHT/PParam::val()->JuiceWaveRow);
     }
     void reset(){
         _mwave=0;
@@ -128,7 +128,7 @@ public:
         _timer_fill.restart();
         _mwave++;
         
-        if(_mwave>MJUICE_ROW-1){
+        if(_mwave>PParam::val()->JuiceWaveRow-1){
 			_timer_move.restart();
 		}
     }

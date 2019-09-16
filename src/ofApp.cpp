@@ -41,22 +41,19 @@ void ofApp::setup(){
 	_millis_now=ofGetElapsedTimeMillis();
 
 
-	_fbo_save.allocate(GIF_HEIGHT,GIF_HEIGHT);
+	_fbo_save.allocate(PParam::val()->GifSize,PParam::val()->GifSize);
 	_recorder.setFormat("png");
 	_recording=false;
-	_timer_record=FrameTimer(1000.0/(float)GIF_FPS);
+	_timer_record=FrameTimer(1000.0/PParam::val()->GifFps);
 	ofAddListener(_timer_record.finish_event,this,&ofApp::onRecordTimerFinish);
 	
 	ofAddListener(_recorder.recordFinish,this,&ofApp::onRecorderFinish);
 	_recorder.startThread();
 
 	_fbo_contour.allocate(ofGetWidth(),ofGetHeight(),GL_LUMINANCE);
+		
 
-	_bgd_learning_time=5;
-	_bgd_threshold=10;
-	
-
-	_fbo_bgd_tmp.allocate(_camera.getWidth()*BGD_DETECT_SCALE,_camera.getHeight()*BGD_DETECT_SCALE,GL_RGB);
+	_fbo_bgd_tmp.allocate(_camera.getWidth()*PParam::val()->BgdDetectScale,_camera.getHeight()*PParam::val()->BgdDetectScale,GL_RGB);
 	_fbo_threshold_tmp.allocate(_camera.getWidth(),_camera.getHeight(),GL_LUMINANCE);
 	_fbo_bgd.allocate(_camera.getWidth(),_camera.getHeight(),GL_RGB);
 
@@ -160,8 +157,8 @@ void ofApp::draw(){
 	ofSetColor(255,0,0);	
 	ofDrawBitmapString("fps= "+ofToString(ofGetFrameRate()),ofGetWidth()-100,10);
 
-	ofDrawBitmapString("learning_time= "+ofToString(_bgd_learning_time),ofGetWidth()-200,20);
-	ofDrawBitmapString("threhold= "+ofToString(_bgd_threshold),ofGetWidth()-200,30);
+	ofDrawBitmapString("learning_time= "+ofToString(PParam::val()->BgdLearningTime),ofGetWidth()-200,20);
+	ofDrawBitmapString("threhold= "+ofToString(PParam::val()->BgdThreshold),ofGetWidth()-200,30);
 	
 	
 	/*ofFill();
@@ -181,10 +178,11 @@ void ofApp::draw(){
 
 	ofPopStyle();
 
-
-	_fbo_bgd_tmp.draw(0,0,_camera.getWidth()*BGD_DETECT_SCALE,_camera.getHeight()*BGD_DETECT_SCALE);
-	_img_threshold.draw(0,_camera.getHeight()*BGD_DETECT_SCALE,_camera.getWidth()*BGD_DETECT_SCALE,_camera.getHeight()*BGD_DETECT_SCALE);
-	_fbo_threshold_tmp.draw(0,_camera.getHeight()*BGD_DETECT_SCALE*2,_camera.getWidth()*BGD_DETECT_SCALE,_camera.getHeight()*BGD_DETECT_SCALE);
+	float tw_=_camera.getWidth()*PParam::val()->BgdDetectScale;
+	float th_=_camera.getHeight()*PParam::val()->BgdDetectScale;
+	_fbo_bgd_tmp.draw(0,0,tw_,th_);
+	_img_threshold.draw(0,th_,tw_,th_);
+	_fbo_threshold_tmp.draw(0,th_*2,tw_,th_);
 #endif
 
 }
@@ -197,8 +195,8 @@ void ofApp::updateBackground(){
 	ofPixels pix;	
 	_fbo_bgd_tmp.readToPixels(pix);
 
-	_background.setLearningTime(_bgd_learning_time);
-	_background.setThresholdValue(_bgd_threshold);
+	_background.setLearningTime(PParam::val()->BgdLearningTime);
+	_background.setThresholdValue(PParam::val()->BgdThreshold);
 	_background.update(pix,_img_threshold);
 	_img_threshold.update();
 
@@ -208,7 +206,7 @@ void ofApp::updateBackground(){
 	ofClear(0);
 //		_img_threshold.draw(0,0,_fbo_threshold_tmp.getWidth(),_fbo_threshold_tmp.getHeight());
 	ofPushMatrix();
-	ofScale(1.0/BGD_DETECT_SCALE,1.0/BGD_DETECT_SCALE);
+	ofScale(1.0/PParam::val()->BgdDetectScale,1.0/PParam::val()->BgdDetectScale);
 		ofPushStyle();
 		ofFill();
 		//ofSetColor(255,0,0);
@@ -300,16 +298,16 @@ void ofApp::keyPressed(int key){
 #endif
 			break;
 		case '-':
-			_bgd_learning_time=min(_bgd_learning_time+1,10.0f);
+			PParam::val()->BgdLearningTime=min(PParam::val()->BgdLearningTime+1,15.0f);
 			break;
 		case '=':
-			_bgd_learning_time=max(_bgd_learning_time-1,0.0f);
+			PParam::val()->BgdLearningTime=max(PParam::val()->BgdLearningTime-1,0.0f);
 			break;
 		case '[':
-			_bgd_threshold=min(_bgd_threshold+1,255.0f);
+			PParam::val()->BgdThreshold=min(PParam::val()->BgdThreshold+1,255.0f);
 			break;
 		case ']':
-			_bgd_threshold=max(_bgd_threshold-1,0.0f);
+			PParam::val()->BgdThreshold=max(PParam::val()->BgdThreshold-1,0.0f);
 			break;
 	}
 }
@@ -337,7 +335,7 @@ void ofApp::loadScene(){
 	//_img_mask.loadImage("_img_ui/mask-08.png");
 	_img_share_frame.loadImage("_img_ui/frame_share.png");
 
-	for(int i=0;i<MJUICE_RESULT;++i)
+	for(int i=0;i<FRUIT_GROUP;++i)
 		_img_share_text[i].load("_img_ui/share/"+ofToString(i+1)+".png");
 	
 	_qrcode_gen.setColor(ofColor(238,216,152),ofColor(0,0,0,0));
@@ -408,8 +406,8 @@ void ofApp::setupCamera(){
 	_finder.setFindBiggestObject(true);
 
 
-	_contour_finder.setMinAreaRadius(_camera.getWidth()*BGD_DETECT_SCALE*.05);
-	_contour_finder.setMaxAreaRadius(_camera.getWidth()*BGD_DETECT_SCALE*.7);
+	_contour_finder.setMinAreaRadius(_camera.getWidth()*PParam::val()->BgdDetectScale*.05);
+	_contour_finder.setMaxAreaRadius(_camera.getWidth()*PParam::val()->BgdDetectScale*.7);
 	_contour_finder.setThreshold(128);
 	_contour_finder.setSimplify(true);
 	_contour_finder.setFindHoles(false);
@@ -615,12 +613,12 @@ void ofApp::setRecord(bool set_){
 	}
 }
 void ofApp::saveCameraFrame(){
-	float scale_=(float)GIF_HEIGHT/(float)CAM_HEIGHT;
+	float scale_=(float)PParam::val()->GifSize/(float)CAM_HEIGHT;
 	float w_=(float)CAM_WIDTH*scale_;
 
 	_fbo_save.begin();
 	ofClear(255);
-		_camera.draw(GIF_HEIGHT/2-w_/2,0,w_,GIF_HEIGHT);		
+		_camera.draw(PParam::val()->GifSize/2-w_/2,0,w_,PParam::val()->GifSize);		
 	_fbo_save.end();
 	
 
@@ -636,7 +634,7 @@ void ofApp::createFruitImage(){
 
 	ofLog()<<"Create Fruit Image !!!";
 	
-	for(int x=0;x<MJUICE_RESULT;++x){
+	for(int x=0;x<FRUIT_GROUP;++x){
 			
 		_fruit_rain.reset();
 		_fruit_rain.setAutoFruit(false);	
@@ -646,12 +644,12 @@ void ofApp::createFruitImage(){
 		for(int i=0;i<180;++i)
 			_fruit_rain.update(16);
 
-		for(int i=0;i<GIF_LENGTH*GIF_FPS;++i){
+		for(int i=0;i<PParam::val()->GifLength*PParam::val()->GifFps;++i){
 			_fbo_save.begin();
 			ofClear(255);
 				ofPushMatrix();
-				ofTranslate((float)GIF_HEIGHT/2,0);
-				ofScale((float)GIF_HEIGHT/WIN_HEIGHT,(float)GIF_HEIGHT/WIN_HEIGHT);
+				ofTranslate((float)PParam::val()->GifSize/2,0);
+				ofScale((float)PParam::val()->GifSize/WIN_HEIGHT,(float)PParam::val()->GifSize/WIN_HEIGHT);
 					_fruit_rain.drawBack(1);
 					_fruit_rain.drawFront(1);
 				ofPopMatrix();

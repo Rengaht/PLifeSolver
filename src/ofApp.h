@@ -2,7 +2,7 @@
 
 #define DRAW_DEBUG
 #define USE_BACKGROUND_SUB
-#define BGD_DETECT_SCALE 0.2
+//#define BGD_DETECT_SCALE 0.2
 
 
 #define CAM_WIDTH 1920
@@ -11,12 +11,12 @@
 #define WIN_WIDTH 1920
 #define WIN_HEIGHT 1080
 
-#define FRUIT_COUNT 18
-#define MJUICE_RESULT 8
-
-#define GIF_FPS 12
-#define GIF_HEIGHT 700
-#define GIF_LENGTH 5
+//#define FRUIT_COUNT 18
+//#define MJUICE_RESULT 8
+//
+//#define GIF_FPS 12
+//#define GIF_HEIGHT 700
+//#define GIF_LENGTH 5
 
 
 
@@ -28,7 +28,7 @@
 #include "ofxQRCodeGenerator.h"
 #include "ofxLayerMask.h"
 
-
+#include "Parameter.h"
 #include "ofxImageSequenceRecorder.h"
 #include "PSceneBase.h"
 #include "PFruitRain.h"
@@ -125,7 +125,7 @@ class ofApp : public ofBaseApp{
 		
 		ofxCv::RunningBackground _background;
 		ofImage _img_threshold;
-		float _bgd_learning_time,_bgd_threshold;
+		//float _bgd_learning_time,_bgd_threshold;
 		ofFbo _fbo_bgd_tmp,_fbo_threshold_tmp,_fbo_bgd;
 		ofxLayerMask _masker;
 		void updateBackground();
@@ -135,7 +135,7 @@ class ofApp : public ofBaseApp{
 		void setStage(PStage set_);
 
 		
-		ofImage _img_share_frame,_img_share_text[MJUICE_RESULT];
+		ofImage _img_share_frame,_img_share_text[FRUIT_GROUP];
 		ofFbo _fbo_save;
 		ofxImageSequenceRecorder _recorder;    
 		void saveCameraFrame();

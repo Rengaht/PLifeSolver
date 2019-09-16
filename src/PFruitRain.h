@@ -4,15 +4,11 @@
 
 #define FRUIT_GROUP 8
 #define FRUIT_BORDER 50
-#define FRUIT_VEL 5
-//#define FRUIT_ACC 0
-#define FRUIT_DENSITY 5
-#define FRUIT_SCALE .8
-
-//#define FRUIT_RAIN_INTERVAL 600
-//#define FRUIT_GROUP_INTERVAL 5000
-
-#define MFRUIT_GROUP_ROW 8
+//#define FRUIT_VEL 5
+//#define FRUIT_DENSITY 5
+//#define FRUIT_SCALE .8
+//
+//#define MFRUIT_GROUP_ROW 8
 
 #include "ofMain.h"
 #include "FrameTimer.h"
@@ -38,7 +34,7 @@ public:
 		_ang=ang_;
 
 		_pos=pos_;
-		_vel=ofVec2f(0,FRUIT_VEL);
+		_vel=ofVec2f(0,PParam::val()->FruitStartVel);
 
 		_back=ofRandom(2)<1;
 		//_acc=ofVec2f(0,FRUIT_ACC);
@@ -63,7 +59,7 @@ public:
 		ofRotate(_ang+_vel.angle(ofVec2f(0,1)));
 		ofTranslate(-_size.x/2,-_size.y/2);
 
-		ofScale(FRUIT_SCALE,FRUIT_SCALE);
+		ofScale(PParam::val()->FruitScale,PParam::val()->FruitScale);
 			_img->draw(0,0);
 		ofPopMatrix();
 		ofPopStyle();
@@ -134,8 +130,8 @@ public:
 		PDrop::_size=ofVec2f(svg_.getWidth(),svg_.getHeight());
 	}
 	void reset(){
-		_idx_group=floor(ofRandom(MJUICE_RESULT));
-		_vel_drop=FRUIT_VEL;
+		_idx_group=floor(ofRandom(FRUIT_GROUP));
+		_vel_drop=PParam::val()->FruitStartVel;
 
 		_fruit.clear();		
 		_juice.reset();
@@ -157,20 +153,20 @@ public:
 	}
 	void addFruit(int index_){
 
-		float grid_=(ofGetHeight()+FRUIT_BORDER*2)/(float)FRUIT_DENSITY;
+		float grid_=(ofGetHeight()+FRUIT_BORDER*2)/(float)PParam::val()->FruitDensity;
 		
 		auto it=_img_fruit[_idx_group].begin();
 		float fw_=(*it).getWidth();
 		float fh_=(*it).getHeight();
 		
-		for(int j=0;j<MFRUIT_GROUP_ROW;++j){
-			for(int i=0;i<=FRUIT_DENSITY;++i){
+		for(int j=0;j<PParam::val()->FruitRowPerGroup;++j){
+			for(int i=0;i<=PParam::val()->FruitDensity;++i){
 				
 				if(_slow && ofRandom(2)<1)  continue;
 				if(!_slow && ofRandom(5)<1) continue;
 
 				_fruit.push_back(PFruit(&(*it),ofVec2f((i)*grid_-FRUIT_BORDER+(j%2==0?-fw_:0),
-												-(fh_*FRUIT_SCALE)*(j+(j+1)*.2)),(ofRandom(2)<1?45:-45)));
+												-(fh_*PParam::val()->FruitScale)*(j+(j+1)*.2)),(ofRandom(2)<1?45:-45)));
 			}
 		}
 	}
@@ -186,7 +182,7 @@ public:
 		_juice.update(dt_);
 
 		if(!_slow){
-			if(_vel_drop<FRUIT_VEL*2) _vel_drop+=.5;
+			if(_vel_drop<PParam::val()->FruitStartVel*2) _vel_drop+=.5;
 		}
 
 		//check if need new fruit

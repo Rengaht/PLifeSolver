@@ -97,6 +97,18 @@
     <ClCompile Include="..\..\..\addons\ofxLayerMask\src\ofxLayerMask.cpp">
       <Filter>addons\ofxLayerMask</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\addons\ofxXmlSettings\src\ofxXmlSettings.cpp">
+      <Filter>addons\ofxXmlSettings\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\addons\ofxXmlSettings\libs\tinyxml.cpp">
+      <Filter>addons\ofxXmlSettings\libs</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\addons\ofxXmlSettings\libs\tinyxmlerror.cpp">
+      <Filter>addons\ofxXmlSettings\libs</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\addons\ofxXmlSettings\libs\tinyxmlparser.cpp">
+      <Filter>addons\ofxXmlSettings\libs</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="src">
@@ -182,6 +194,15 @@
     </Filter>
     <Filter Include="addons\ofxLayerMask">
       <UniqueIdentifier>{dfc179cf-0093-418f-ae59-4d6225f32ceb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="addons\ofxXmlSettings">
+      <UniqueIdentifier>{f28a058b-3b77-462f-abfb-110d566a7623}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="addons\ofxXmlSettings\src">
+      <UniqueIdentifier>{e6893d0a-c868-4c31-9fec-3a0cfedcf5a2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="addons\ofxXmlSettings\libs">
+      <UniqueIdentifier>{9e1e12cf-3546-4d20-be07-3fbf948270e0}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -316,6 +337,15 @@
     </ClInclude>
     <ClInclude Include="..\..\..\addons\ofxLayerMask\src\ofxLayerMask.h">
       <Filter>addons\ofxLayerMask</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Parameter.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\addons\ofxXmlSettings\src\ofxXmlSettings.h">
+      <Filter>addons\ofxXmlSettings\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\addons\ofxXmlSettings\libs\tinyxml.h">
+      <Filter>addons\ofxXmlSettings\libs</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
