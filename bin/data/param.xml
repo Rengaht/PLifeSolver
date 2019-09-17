@@ -30,3 +30,4 @@
 	<OrangePassion cmd="p">10</OrangePassion>
 </SerialCmd>
 <SerialPort>0</SerialPort>
+<DelCmd>DEL /F/Q</DelCmd>

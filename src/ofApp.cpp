@@ -108,7 +108,8 @@ void ofApp::draw(){
 	ofScale(cam_scale,cam_scale);			
 	
 
-	_camera.draw(_camera.getWidth(),0,-_camera.getWidth(),_camera.getHeight());
+	if(_camera.isInitialized()) 
+		_camera.draw(_camera.getWidth(),0,-_camera.getWidth(),_camera.getHeight());
 
 	if(!_camera_paused && _stage>PSLEEP) drawFaceFrame();
 	ofPopMatrix();
@@ -161,22 +162,8 @@ void ofApp::draw(){
 	ofDrawBitmapString("learning_time= "+ofToString(PParam::val()->BgdLearningTime),ofGetWidth()-200,20);
 	ofDrawBitmapString("threhold= "+ofToString(PParam::val()->BgdThreshold),ofGetWidth()-200,30);
 	
-	
-	/*ofFill();
-	ofPushMatrix();
-	ofTranslate(ofGetWidth()/2,580);
-	ofBeginShape();
-	float m=210;
-	float a_=TWO_PI/m;
-	float r_=200;
-	for(float i=0;i<m;++i){
-		float rr_=r_*(1.0+.3*ofNoise(i/100.0));
-		ofVertex(rr_*sin(i*a_),rr_*cos(i*a_));
-	}
-	ofEndShape();
-	
-	ofPopMatrix();*/
-	ofNoFill();
+
+	/*ofNoFill();
 	float s_=1.0/PParam::val()->BgdDetectScale*cam_scale;
 	ofPushMatrix();
 	ofTranslate(ofGetWidth()/2-cam_wid/2,0);
@@ -184,7 +171,7 @@ void ofApp::draw(){
 	for(auto& r_:_rect_contour){
 		ofDrawRectangle(r_.getLeft(),r_.getTop(),r_.getWidth(),r_.getHeight());
 	}
-	ofPopMatrix();
+	ofPopMatrix();*/
 
 	ofPopStyle();
 
@@ -199,7 +186,8 @@ void ofApp::draw(){
 void ofApp::updateBackground(){
 	_fbo_bgd_tmp.begin();
 	ofClear(0);
-		_camera.draw(0,0,_fbo_bgd_tmp.getWidth(),_fbo_bgd_tmp.getHeight());
+		if(_camera.isInitialized()) 
+			_camera.draw(0,0,_fbo_bgd_tmp.getWidth(),_fbo_bgd_tmp.getHeight());
 	_fbo_bgd_tmp.end();
 			
 	ofPixels pix;	
@@ -333,6 +321,10 @@ void ofApp::keyPressed(int key){
 			break;
 		case ']':
 			PParam::val()->BgdThreshold=max(PParam::val()->BgdThreshold-1,0.0f);
+			break;
+		default:
+			_idx_channel=floor(ofRandom(10));
+			sendJuiceSignal();
 			break;
 	}
 }
@@ -611,30 +603,34 @@ void ofApp::setupSerial(){
 	_serial.setup(PParam::val()->SerialPort, 9600);
 
 	for(int i=0;i<PParam::val()->ChannelCmd.size();++i) _status_channel.push_back(0);
+	_parse_index=0;
 }
 void ofApp::parseChannelStatus(){
 
 	if(!_serial.isInitialized()) return;
 
 	while(_serial.available()){
-		int byte_=_serial.readByte();
+		char byte_=_serial.readByte();
+		//ofLog()<<byte_;
 		if(byte_=='a'){
+			//ofLog()<<"--------- parse start! ---------";
+			_parse_index=0;
+		}else if(byte_=='1'){
 			
-			ofLog()<<"--------- parse start! ---------";
+			if(_parse_index<0 || _parse_index>=PParam::val()->ChannelCmd.size()) continue;
+			
+			_status_channel[_parse_index]=1;
+			_parse_index++;
+			ofLog()<<"--------- channel= "<<_parse_index<<" status= 1 ---------";
+		}else if(byte_=='0'){
 
-			for(int i=0;i<PParam::val()->ChannelCmd.size();++i){
-				int k=_serial.readByte();
-				if(k=='1') _status_channel[i]=1;
-				else _status_channel[i]=0;				
-				ofLog()<<"--------- channel= "<<i<<" status= "<<_status_channel[i]<<" ---------";
-			}
+			if(_parse_index<0 || _parse_index>=PParam::val()->ChannelCmd.size()) continue;
 
-			int byte_=_serial.readByte();
-			if(byte_=='a'){				
-				ofLog()<<"--------- parse finish! ---------";
-			}
-
+			_status_channel[_parse_index]=0;
+			_parse_index++;
+			ofLog()<<"--------- channel= "<<_parse_index<<" status= 0 ---------";
 		}
+		
 	}
 
 }
@@ -682,7 +678,7 @@ void ofApp::setRecord(bool set_){
 		_timer_record.restart();
 
 		//_recorder.startThread();
-		ofSystem("DEL /F/Q "+ofToDataPath("tmp\\")+"*.png");
+		ofSystem(PParam::val()->DeleteCmd+" "+ofToDataPath("tmp\\")+"*.png");
 
 		ofLog()<<"start recording.... "<<ofGetElapsedTimeMillis();
 	}else{

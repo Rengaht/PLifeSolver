@@ -40,6 +40,7 @@ public:
 	float BgdLearningTime;
 	float BgdThreshold;
 
+	string DeleteCmd;
 	string FFmpegCmd;
 	string FFmpegFilter;
 
@@ -90,6 +91,7 @@ public:
 		BgdLearningTime=_param.getValue("BgdLearningTime",5);
 		BgdThreshold=_param.getValue("BgdThreshold",10);
 
+		DeleteCmd=_param.getValue("FFmpegCmd","");
 		FFmpegCmd=_param.getValue("FFmpegCmd","");
 		FFmpegFilter=_param.getValue("FFmpegFilter","");
 

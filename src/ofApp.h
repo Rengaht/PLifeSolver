@@ -157,5 +157,6 @@ class ofApp : public ofBaseApp{
 
 		vector<int> _status_channel;
 		void parseChannelStatus();
+		int _parse_index;
 
 };

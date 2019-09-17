@@ -42,8 +42,8 @@ public:
 		_timer_in[4]=FrameTimer(EASE_DUE,PParam::val()->CardTime*2.5);
 
 
-		ofAddListener(_timer_in[0].finish_event,this,&PSceneResult::onCardInFinish);
 		ofAddListener(_timer_in[1].finish_event,this,&PSceneResult::onCardInFinish);
+		ofAddListener(_timer_in[2].finish_event,this,&PSceneResult::onCardInFinish);
 
 		ofAddListener(_timer_in[3].finish_event,this,&PSceneResult::onTimerSceneInFinish);
 		ofAddListener(_timer_scan.finish_event,this,&PSceneResult::onTimerScanFinish);
