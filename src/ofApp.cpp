@@ -178,7 +178,7 @@ void ofApp::draw(){
 	float tw_=_camera.getWidth()*PParam::val()->BgdDetectScale;
 	float th_=_camera.getHeight()*PParam::val()->BgdDetectScale;
 	_fbo_bgd_tmp.draw(0,0,tw_,th_);
-	_img_threshold.draw(0,th_,tw_,th_);
+	if(_img_threshold.isAllocated()) _img_threshold.draw(0,th_,tw_,th_);
 	_fbo_threshold_tmp.draw(0,th_*2,tw_,th_);
 #endif
 
@@ -571,7 +571,7 @@ int ofApp::getJuiceFromEmotion(ofxJSONElement emotion_){
 	
 	for(auto& n:name_){
 		int t=getJuice(n);
-		if(emotion_[n].asFloat()>val_ && checkJuiceStorage((PParam::PJuice)t)>-1){
+		if(emotion_[n].asFloat()>=val_ && checkJuiceStorage((PParam::PJuice)t)>-1){
 			mood_=n;
 			juice_=t;
 			val_=emotion_[n].asFloat();
@@ -580,8 +580,7 @@ int ofApp::getJuiceFromEmotion(ofxJSONElement emotion_){
 		}
 	}
 	
-	
-	ofLog()<<mood_<<" ---> "<<juice_;
+	ofLog()<<mood_<<" ---> "<<juice_<<"  channel= "<<_idx_channel;
 	return juice_;
 }
 PParam::PJuice ofApp::getJuice(string mood_){
@@ -647,6 +646,7 @@ int ofApp::checkJuiceStorage(PParam::PJuice get_){
 	for(auto& p:PParam::val()->JuiceChannel[get_]){
 		if(_status_channel[p]==0) available_channel_=p;
 	}
+
 	return available_channel_;
 }
 void ofApp::sendJuiceSignal(){
