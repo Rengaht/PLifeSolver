@@ -7,7 +7,7 @@
 #include "ofMain.h"
 #include "ofxXmlSettings.h"
 
-const string PARAMETER_PATH="data\\param.xml";
+const string PARAMETER_PATH="param.xml";
 
 class PParam{
 
@@ -16,7 +16,8 @@ public:
 	static PParam* _instance;	
 	
 	string FolderExport;
-	
+	enum PJuice {RED_DRAGON,HONEY_LEMON,VEGETABLE,BEETROOT,CARROT,COCONUT,PINEAPPLE,ORANGE_PASSION};
+		
 	
 	int GifLength;
 	int GifFps;
@@ -42,6 +43,11 @@ public:
 	string FFmpegCmd;
 	string FFmpegFilter;
 
+	list<int> JuiceChannel[FRUIT_GROUP];
+	map<int,string> ChannelCmd;
+
+	int SerialPort;
+
 	PParam(){
 		readParam();
 
@@ -56,7 +62,7 @@ public:
 
 		ofxXmlSettings _param;
 		bool file_exist=true;
-		if(_param.loadFile(PARAMETER_PATH) ){
+		if(_param.loadFile(ofToDataPath(PARAMETER_PATH))){
 			ofLog()<<PARAMETER_PATH<<" loaded!";
 		}else{
 			ofLog()<<"Unable to load xml check data/ folder";
@@ -87,10 +93,34 @@ public:
 		FFmpegCmd=_param.getValue("FFmpegCmd","");
 		FFmpegFilter=_param.getValue("FFmpegFilter","");
 
+		SerialPort=_param.getValue("SerialPort",0);
+
+		_param.pushTag("SerialCmd");
+		readChannel(_param,"RedDragon",RED_DRAGON);
+		readChannel(_param,"HoneyLemon",HONEY_LEMON);
+		readChannel(_param,"Vegetable",VEGETABLE);
+		readChannel(_param,"Beetroot",BEETROOT);
+		readChannel(_param,"Carrot",CARROT);
+		readChannel(_param,"Coconut",COCONUT);
+		readChannel(_param,"Pineapple",PINEAPPLE);
+		readChannel(_param,"OrangePassion",ORANGE_PASSION);
+
 		if(!file_exist) saveParameterFile();
 
 	
 	}	
+	void readChannel(ofxXmlSettings p_,string tag_,int index_){
+		int m=p_.getNumTags(tag_);
+		for(int i=0;i<m;++i){
+			int channel_=p_.getValue(tag_,0,i);
+			JuiceChannel[index_].push_back(channel_);
+
+			if(ChannelCmd.find(channel_)==ChannelCmd.end()){			
+				ChannelCmd[channel_]=p_.getAttribute(tag_,"cmd","",i);
+			}
+		}
+	}
+
 	void saveParameterFile(){
 
 

@@ -111,6 +111,7 @@ public:
 		_timer_count.restart();
 
 		_ptr_app->playSound(ofApp::PSound::SFINISH);
+		_ptr_app->sendJuiceSignal();
 	}
 	void onTimerScanFinish(int &e){
 		_ptr_app->prepareScene(ofApp::PSLEEP);

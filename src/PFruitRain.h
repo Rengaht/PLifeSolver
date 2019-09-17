@@ -2,7 +2,7 @@
 #ifndef PFRUIT_RAIN_H
 #define PFRUIT_RAIN_H
 
-#define FRUIT_GROUP 8
+
 #define FRUIT_BORDER 50
 //#define FRUIT_VEL 5
 //#define FRUIT_DENSITY 5

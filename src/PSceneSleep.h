@@ -6,6 +6,8 @@
 #include "PGlowLine.h"
 
 #define FACE_DETECT_FRAME 4000
+#define FACE_ANIMATION_LEGNTH 360
+#define FACE_ANIMATION_FPS 30
 
 class PSceneSleep:public SceneBase{
 
@@ -14,7 +16,8 @@ class PSceneSleep:public SceneBase{
 
 	ofImage _img_hint[2];
 	ofImage _img_text[2];
-	ofImage _img_face;
+	ofImage _img_face[FACE_ANIMATION_LEGNTH];
+	FrameTimer _timer_animation;
 	
 	int _index_face_start;
 	
@@ -41,7 +44,12 @@ public:
 		_img_text[0].loadImage("_img_ui/text_sleep-1.png");
 		_img_text[1].loadImage("_img_ui/text_sleep-2.png");
 
-		_img_face.loadImage("_img_ui/face_sleep.png");
+		for(int i=0;i<FACE_ANIMATION_LEGNTH;++i){
+			_img_face[i].loadImage("_img_ui/sleep/Comp 1_"+ofToString(i,5,'0')+".png");
+		}
+		_timer_animation=FrameTimer(1000.0/FACE_ANIMATION_FPS);
+		_timer_animation.setContinuous(true);
+		_timer_animation.restart();
 
 		_glow=PGlowLine(540,540,420,420,60);
 
@@ -74,7 +82,7 @@ public:
 					ofPopStyle();
 				}
 				
-				_img_face.draw(0,0,WIN_HEIGHT,WIN_HEIGHT);
+				_img_face[_timer_animation.num()%FACE_ANIMATION_LEGNTH].draw(0,0,WIN_HEIGHT,WIN_HEIGHT);
 				break;
 		}
 
@@ -84,7 +92,9 @@ public:
 		_glow.update(dt_);
 		
 		_timer_hint.update(dt_);
-		
+		_timer_animation.update(dt_);
+
+
 		_timer_confirm.update(dt_);
 		if(!_sound_confirm_played &&_timer_confirm.val()*5>2){
 			_sound_confirm_played=true;

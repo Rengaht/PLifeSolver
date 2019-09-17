@@ -2,6 +2,8 @@
 
 #define DRAW_DEBUG
 #define USE_BACKGROUND_SUB
+#define MIRROR_CAMERA
+#define WEEKAND_OFF
 //#define BGD_DETECT_SCALE 0.2
 
 
@@ -10,6 +12,7 @@
 
 #define WIN_WIDTH 1920
 #define WIN_HEIGHT 1080
+#define FRUIT_GROUP 8
 
 //#define FRUIT_COUNT 18
 //#define MJUICE_RESULT 8
@@ -34,6 +37,7 @@
 #include "PFruitRain.h"
 
 
+
 using namespace cv;
 using namespace ofxCv;
 
@@ -43,7 +47,6 @@ class ofApp : public ofBaseApp{
 
 		/* scene */
 		enum PStage {PSLEEP,PAUTH,PDETECT,PANALYSIS,PRESULT,PEMPTY};
-		enum PJuice {RED_DRAGON,HONEY_LEMON,VEGETABLE,BEETROOT,CARROT,COCONUT,PINEAPPLE,ORANGE_PASSION};
 		PStage _stage,_stage_pre,_stage_next;
 		SceneBase* _scene[5];
 
@@ -66,9 +69,9 @@ class ofApp : public ofBaseApp{
 		void parseFaceData(string data_);
 		int getJuiceFromEmotion(ofxJSONElement emotion_);
 		
-		PJuice getJuice(string mood_);
-		bool checkJuiceStorage(PJuice get_);
-		void sendJuiceSignal(int send_);
+		PParam::PJuice getJuice(string mood_);
+		int checkJuiceStorage(PParam::PJuice get_);
+		void sendJuiceSignal();
 		ofSerial _serial;
 		void setupSerial();
 
@@ -84,7 +87,7 @@ class ofApp : public ofBaseApp{
 		ofxJSONElement _user_data;
 
 		string _user_id;
-		int _idx_user_juice;
+		int _idx_user_juice,_idx_channel;
 
 		void createUserID();
 
@@ -151,4 +154,8 @@ class ofApp : public ofBaseApp{
 		void createFruitImage();
 
 		ofSoundPlayer _soundfx[5];
+
+		vector<int> _status_channel;
+		void parseChannelStatus();
+
 };

@@ -13,5 +13,20 @@
 <BgdDetectScale>0.200000003</BgdDetectScale>
 <BgdLearningTime>5.000000000</BgdLearningTime>
 <BgdThreshold>10.000000000</BgdThreshold>
-<FFmpegCmd>ffmpeg -y</FFmpegCmd>
-<FFmpegFilter>-filter_complex "[0][1]overlay=shortest=1[tmp];[tmp]reverse,fifo [r];[0][1]overlay=shortest=1[tmp2]; [tmp2][r] concat=n=2:v=1 [v]" -map "[v]"</FFmpegFilter>
+<FFmpegCmd>ffmpeg -loglevel panic -y</FFmpegCmd>
+<FFmpegFilter>-filter_complex "[0][1]overlay=shortest=1[tmp]" -map "[tmp]"</FFmpegFilter>
+<FFmpegFilter2>-filter_complex "[0][1]overlay=shortest=1[tmp];[tmp]reverse,fifo [r];[0][1]overlay=shortest=1[tmp2]; [tmp2][r] concat=n=2:v=1 [v]" -map "[v]"</FFmpegFilter2>
+<SerialCmd>
+	<RedDragon cmd="q">1</RedDragon>
+	<HoneyLemon cmd="w">2</HoneyLemon>
+	<Vegetable cmd="e">3</Vegetable>
+	<Beetroot cmd="r">4</Beetroot>
+	<Beetroot cmd="t">5</Beetroot>
+
+	<Carrot cmd="y">6</Carrot>
+	<Coconut cmd="u">7</Coconut>
+	<Pineapple cmd="i">8</Pineapple>
+	<OrangePassion cmd="o">9</OrangePassion>
+	<OrangePassion cmd="p">10</OrangePassion>
+</SerialCmd>
+<SerialPort>0</SerialPort>

@@ -94,6 +94,8 @@ void ofApp::update(){
 	_fruit_rain.update(dt_);
 
 	_scene[_stage]->update(dt_);
+
+	parseChannelStatus();
 }
 
 //--------------------------------------------------------------
@@ -565,6 +567,8 @@ void ofApp::parseFaceData(string data_){
 }
 int ofApp::getJuiceFromEmotion(ofxJSONElement emotion_){
 
+	ofLog()<<emotion_.toStyledString();
+
 	// find highest score
 	float val_=0;
 	string mood_;
@@ -573,25 +577,28 @@ int ofApp::getJuiceFromEmotion(ofxJSONElement emotion_){
 	
 	for(auto& n:name_){
 		int t=getJuice(n);
-		if(emotion_[n].asFloat()>val_ && checkJuiceStorage((PJuice)t)){
+		if(emotion_[n].asFloat()>val_ && checkJuiceStorage((PParam::PJuice)t)>-1){
 			mood_=n;
 			juice_=t;
 			val_=emotion_[n].asFloat();
+
+			_idx_channel=checkJuiceStorage((PParam::PJuice)t);
 		}
 	}
+	
 	
 	ofLog()<<mood_<<" ---> "<<juice_;
 	return juice_;
 }
-ofApp::PJuice ofApp::getJuice(string mood_){
+PParam::PJuice ofApp::getJuice(string mood_){
 
-	if(mood_=="disgust") return RED_DRAGON;
-	if(mood_=="neutral") return HONEY_LEMON;
-	if(mood_=="sadness") return VEGETABLE;
-	if(mood_=="fear") return BEETROOT;
-	if(mood_=="anger") return COCONUT;
-	if(mood_=="contempt") return PINEAPPLE;
-	if(mood_=="happiness") return ORANGE_PASSION;
+	if(mood_=="disgust") return PParam::RED_DRAGON;
+	if(mood_=="neutral") return PParam::HONEY_LEMON;
+	if(mood_=="sadness") return PParam::VEGETABLE;
+	if(mood_=="fear") return PParam::BEETROOT;
+	if(mood_=="anger") return PParam::COCONUT;
+	if(mood_=="contempt") return PParam::PINEAPPLE;
+	if(mood_=="happiness") return PParam::ORANGE_PASSION;
 	
 }
 
@@ -601,18 +608,60 @@ void ofApp::setupSerial(){
 	for(auto& t:deviceList){
 		ofLog()<<t.getDeviceID()<<"  "<<t.getDeviceName();
 	}
-	_serial.setup(0, 9600);
-}
+	_serial.setup(PParam::val()->SerialPort, 9600);
 
-bool ofApp::checkJuiceStorage(PJuice get_){
-	//TODO!!!
-	return true;
+	for(int i=0;i<PParam::val()->ChannelCmd.size();++i) _status_channel.push_back(0);
 }
-void ofApp::sendJuiceSignal(int send_){
-	if(!_serial.available()) return;
+void ofApp::parseChannelStatus(){
 
-	char sig_[8]={'a','a','a','a','a','a','a','a'};
-	_serial.writeByte(sig_[send_]);	
+	if(!_serial.isInitialized()) return;
+
+	while(_serial.available()){
+		int byte_=_serial.readByte();
+		if(byte_=='a'){
+			
+			ofLog()<<"--------- parse start! ---------";
+
+			for(int i=0;i<PParam::val()->ChannelCmd.size();++i){
+				int k=_serial.readByte();
+				if(k=='1') _status_channel[i]=1;
+				else _status_channel[i]=0;				
+				ofLog()<<"--------- channel= "<<i<<" status= "<<_status_channel[i]<<" ---------";
+			}
+
+			int byte_=_serial.readByte();
+			if(byte_=='a'){				
+				ofLog()<<"--------- parse finish! ---------";
+			}
+
+		}
+	}
+
+}
+int ofApp::checkJuiceStorage(PParam::PJuice get_){
+
+#ifdef WEEKAND_OFF
+	int day_=ofGetWeekday();
+	if(day_==0 || day_==6) return 0;
+#endif
+
+	int available_channel_=-1;	
+	for(auto& p:PParam::val()->JuiceChannel[get_]){
+		if(_status_channel[p]==0) available_channel_=p;
+	}
+	return available_channel_;
+}
+void ofApp::sendJuiceSignal(){
+	if(!_serial.isInitialized()) return;
+	if(_idx_channel<0) return;
+
+#ifdef WEEKAND_OFF
+	int day_=ofGetWeekday();
+	if(day_==0 || day_==6) return;
+#endif
+
+	auto c_=PParam::val()->ChannelCmd[_idx_channel].c_str();
+	_serial.writeByte(c_[0]);	
 }
 
 
@@ -654,7 +703,7 @@ void ofApp::saveCameraFrame(){
 	ofPixels pix;	
     _fbo_save.readToPixels(pix);	
 	pix.mirror(false,true);
-
+ 
 	_recorder.addFrame(pix);
 	//ofSaveImage(pix,"raw/"+_user_id+".png");
 
