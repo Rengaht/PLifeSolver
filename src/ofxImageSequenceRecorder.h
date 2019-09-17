@@ -47,9 +47,9 @@ public:
 	void setUserID(string set_){
 		_user_id=set_;
 	}
-	void setJuiceID(int set_){
+	/*void setJuiceID(int set_){
 		_juice_id=set_;
-	}
+	}*/
        
     void threadedFunction() {    
         while(isThreadRunning()) {
@@ -63,21 +63,26 @@ public:
 					
 					counter=0;
 					_save_count=0;
-					string cmd=PParam::val()->FFmpegCmd
-						+" -framerate "+ofToString(PParam::val()->GifFps)
-						+" -i "+ofToDataPath("tmp/")+_user_id+"_%4d.png"
-						+" -i "+ofToDataPath("juice/")+ofToString(_juice_id+1)+"/%4d.png "
-						+PParam::val()->FFmpegFilter+" "
-						+ofToDataPath("output/")+_user_id+".gif";
-					ofLog()<<cmd;
-					ofSystem(cmd);
 					ofNotifyEvent(recordFinish,counter,this);
 				}
 			}
         }
         
     }   
-    
+	void createGif(int set_){
+		
+		_juice_id=set_;
+
+		string cmd=PParam::val()->FFmpegCmd
+			+" -framerate "+ofToString(PParam::val()->GifFps)
+			+" -i "+ofToDataPath("tmp/")+_user_id+"_%4d.png"
+			+" -i "+ofToDataPath("juice/")+ofToString(_juice_id+1)+"/%4d.png "
+			+PParam::val()->FFmpegFilter+" "
+			+ofToDataPath("output/")+_user_id+".gif";
+		ofLog()<<cmd;
+		ofSystem(cmd);
+		ofLog()<<"----------- finish create gif ------------";
+	}
     void addFrame(ofImage &img){
         addFrame(img.getPixelsRef());
     }

@@ -81,8 +81,11 @@ public:
 						_img_hint[1].draw(0,0,WIN_HEIGHT,WIN_HEIGHT);
 					ofPopStyle();
 				}
-				
-				_img_face[_timer_animation.num()%FACE_ANIMATION_LEGNTH].draw(0,0,WIN_HEIGHT,WIN_HEIGHT);
+				ofPushMatrix();
+				ofTranslate(WIN_HEIGHT/2,WIN_HEIGHT/2);
+				ofScale(.7,.7);
+					_img_face[_timer_animation.num()%FACE_ANIMATION_LEGNTH].draw(-320,-400);
+				ofPopMatrix();
 				break;
 		}
 

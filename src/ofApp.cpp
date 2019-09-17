@@ -322,10 +322,10 @@ void ofApp::keyPressed(int key){
 		case ']':
 			PParam::val()->BgdThreshold=max(PParam::val()->BgdThreshold-1,0.0f);
 			break;
-		default:
+		/*default:
 			_idx_channel=floor(ofRandom(10));
 			sendJuiceSignal();
-			break;
+			break;*/
 	}
 }
 
@@ -550,8 +550,10 @@ void ofApp::parseFaceData(string data_){
 				return;
 			}
 
-			_recorder.setJuiceID(_idx_user_juice);
+			_recorder.createGif(_idx_user_juice);
 			_face_analysis_ready=true;
+				
+			 uploadImage(_user_id);
 		}
         _user_data["face"]=json_;
 	}
@@ -744,8 +746,6 @@ void ofApp::createFruitImage(){
 
 void ofApp::onRecorderFinish(int &e){
 	ofLog()<<"Recorder finish !!!";
-	
-	uploadImage(_user_id);
 		
 }
 
