@@ -41,7 +41,7 @@ public:
 		ofAddListener(_timer_flash.finish_event,this,&PSceneDetect::onTimerFlashFinish);
 		ofAddListener(_timer_in[1].finish_event,this,&PSceneDetect::onSceneInFinish);
 
-		_glow=PGlowLine(WIN_HEIGHT/2,915,200,150,30);
+		_glow=PGlowLine(WIN_HEIGHT/2,915,160,150,30);
 	}
 	void drawLayer(int i){
 		switch(i){

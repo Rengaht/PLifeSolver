@@ -99,10 +99,10 @@ public:
 
 
 		_timer_confirm.update(dt_);
-		if(!_sound_confirm_played &&_timer_confirm.val()*5>2){
+		/*if(!_sound_confirm_played &&_timer_confirm.val()*5>2){
 			_sound_confirm_played=true;
 			_ptr_app->playSound(ofApp::PSound::SCHECK);
-		}
+		}*/
 
 
 		 if(_ptr_app->faceFound()){

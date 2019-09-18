@@ -11,8 +11,8 @@
 <QrcodeTime>20000</QrcodeTime>
 <CardTime>2000</CardTime>
 <BgdDetectScale>0.200000003</BgdDetectScale>
-<BgdLearningTime>5.000000000</BgdLearningTime>
-<BgdThreshold>10.000000000</BgdThreshold>
+<BgdLearningTime>6.000000000</BgdLearningTime>
+<BgdThreshold>20.000000000</BgdThreshold>
 <FFmpegCmd>ffmpeg -loglevel panic -y</FFmpegCmd>
 <FFmpegFilter>-filter_complex "[0][1]overlay=shortest=1,scale=800:-1:flags=lanczos,split[v1][v2]; [v1]palettegen=stats_mode=full [palette];[v2][palette]paletteuse=dither=sierra2_4a[vout]" -map "[vout]"</FFmpegFilter>
 
@@ -34,3 +34,4 @@
 <DelCmd>DEL /F/Q</DelCmd>
 <JandiWebhookIn>https://wh.jandi.com/connect-api/webhook/14606752/a51124a5fac916f4f70cc6b4c42cfb61</JandiWebhookIn>
 <ContourThreshold>200</ContourThreshold>
+<ContourSmoothed>12</ContourSmoothed>

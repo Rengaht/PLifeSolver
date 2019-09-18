@@ -9,7 +9,7 @@
 class PSceneAuth:public SceneBase{
 
 	FrameTimer _timer_hint;
-	FrameTimer _timer_confirm;
+	//FrameTimer _timer_confirm;
 
 	int _num_timer;
 
@@ -18,44 +18,45 @@ class PSceneAuth:public SceneBase{
 	ofImage _img_confirm;
 
 	PGlowLine _glow;
-	bool _sound_confirm_played;
+	//bool _sound_confirm_played;
 
 public:
 	PSceneAuth(ofApp* set_):SceneBase(set_){
-		_mlayer=2;
+		_mlayer=1;
 		_order_scene=1;
 
-		_timer_hint=FrameTimer(1000);
-		_timer_confirm=FrameTimer(3000);
+		_timer_hint=FrameTimer(2000);
+		//_timer_confirm=FrameTimer(3000);
 
 		_img_hint.loadImage("_img_ui/hint_auth.png");
 		
-		for(int i=0;i<MAUTH_COUNT;++i)
+		/*for(int i=0;i<MAUTH_COUNT;++i)
 			_img_text[i].loadImage("_img_ui/text_auth/"+ofToString(i+1)+".png");
 
-		_img_confirm.loadImage("_img_ui/hint_confirm.png");
+		_img_confirm.loadImage("_img_ui/hint_confirm.png");*/
 		
 		setup();
 
 		ofAddListener(_timer_hint.finish_event,this,&PSceneAuth::onTimerHintFinish);
-		ofAddListener(_timer_confirm.finish_event,this,&PSceneAuth::onTimerConfirmFinish);
-		ofAddListener(_timer_in[1].finish_event,this,&PSceneAuth::onSceneInFinish);
+		//ofAddListener(_timer_confirm.finish_event,this,&PSceneAuth::onTimerConfirmFinish);
+		ofAddListener(_timer_in[0].finish_event,this,&PSceneAuth::onSceneInFinish);
 
-		_glow=PGlowLine(540,915,200,150,30);
+		_glow=PGlowLine(540,915,240,150,30);
 
 	}
 	void drawLayer(int i){		
 		switch(i){
 			case 0:
 				// countdown
-				ofPushStyle();
-				ofSetColor(255,255*ofClamp(1.0-_timer_hint.val(),0,1)*getLayerAlpha(0));
-					//_ptr_app->_img_number[(int)ofClamp(2-_num_timer,0,2)].draw(373,771,53,74);
-					_img_text[(int)ofClamp(MAUTH_COUNT-1-_num_timer,0,MAUTH_COUNT-1)].draw(0,0,WIN_HEIGHT,WIN_HEIGHT);				
-				ofPopStyle();
-
+				//ofPushStyle();
+				//ofSetColor(255,255*ofClamp(1.0-_timer_hint.val(),0,1)*getLayerAlpha(0));
+				//	//_ptr_app->_img_number[(int)ofClamp(2-_num_timer,0,2)].draw(373,771,53,74);
+				//	_img_text[(int)ofClamp(MAUTH_COUNT-1-_num_timer,0,MAUTH_COUNT-1)].draw(0,0,WIN_HEIGHT,WIN_HEIGHT);				
+				//ofPopStyle();
+				_img_hint.draw(0,0,WIN_HEIGHT,WIN_HEIGHT);
+				_glow.draw(getLayerAlpha(0));
 				break;
-			case 1:
+			/*case 1:
 				ofPushStyle();
 								
 				ofSetColor(255,255*ofClamp(1.0-3*_timer_confirm.val(),0,1)*getLayerAlpha(1));
@@ -66,7 +67,7 @@ public:
 				ofPopStyle();
 				
 				_glow.draw(getLayerAlpha(1));
-				break;
+				break;*/
 		}
 
 	}
@@ -74,13 +75,13 @@ public:
 		SceneBase::update(dt_);
 		
 		_timer_hint.update(dt_);		
-		_timer_confirm.update(dt_);
+		/*_timer_confirm.update(dt_);
 		if(_ptr_app->faceFound()){
 			if(!_sound_confirm_played && _timer_confirm.valEaseInOut()*3>2){
 				_sound_confirm_played=true;
 				_ptr_app->playSound(ofApp::PSound::SCHECK);
 			}
-		}
+		}*/
 
 		_glow.update(dt_);
 	}
@@ -88,23 +89,25 @@ public:
 	void init(){
 		SceneBase::init();
 		_num_timer=0;
-		_sound_confirm_played=false;
+		//_sound_confirm_played=false;
 	}
 
 	void onSceneInFinish(int &e){
 		_timer_hint.restart();
-		_ptr_app->playSound(ofApp::PSound::SCOUNT);
+		//_ptr_app->playSound(ofApp::PSound::SCHECK);
 	}
 	void onTimerHintFinish(int &e){
 		
-		_num_timer++;
+		_ptr_app->prepareScene(ofApp::PDETECT);
+
+		/*_num_timer++;
 		if(_num_timer<3){
 			_timer_hint.restart();		
 			_ptr_app->playSound(ofApp::PSound::SCOUNT);
 		}else{
 			if(_ptr_app->faceFound()) _timer_confirm.restart();
 			else _ptr_app->prepareScene(ofApp::PSLEEP);
-		}
+		}*/
 	}
 	void onTimerConfirmFinish(int &e){
 		_ptr_app->prepareScene(ofApp::PDETECT);

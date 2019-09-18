@@ -12,6 +12,7 @@ class PSceneAnalysis:public SceneBase{
 	PGlowLine _glow;
 
 	int _idx_hint;
+	bool _receive_result;
 
 public:
 	PSceneAnalysis(ofApp* set_):SceneBase(set_){
@@ -29,6 +30,7 @@ public:
 
 		ofAddListener(_timer_in[0].finish_event,this,&PSceneAnalysis::onSceneInFinish);
 		ofAddListener(_timer_hint.finish_event,this,&PSceneAnalysis::onTimerHintFinish);
+		ofAddListener(_ptr_app->_event_receive_result,this,&PSceneAnalysis::onResultFinish);
 
 		_glow=PGlowLine(540,915,200,150,30);
 		_timer_sleep=FrameTimer(SLEEP_TIME*3);
@@ -57,12 +59,18 @@ public:
 		SceneBase::update(dt_);
 		_glow.update(dt_);
 		_timer_hint.update(dt_);
+
+		if(_receive_result && _idx_hint>=NUM_HINT_ANALYSIS-1){
+			_ptr_app->prepareScene(ofApp::PRESULT);
+			_receive_result=false;
+		}
 	}
 
 	void init(){
 		SceneBase::init();
 		_idx_hint=0;
 		_timer_hint.restart();
+		_receive_result=false;
 	}
 	void onSceneInFinish(int &e){
 		_ptr_app->sendFaceRequest();
@@ -77,6 +85,9 @@ public:
 		else _glow.setWidth(150);
 
 		//_glow.restart();
+	}
+	void onResultFinish(int &e){
+		_receive_result=true;
 	}
 };
 

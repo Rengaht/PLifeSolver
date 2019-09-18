@@ -170,14 +170,25 @@ public:
 				if(!_slow && ofRandom(5)<1) continue;
 
 				float x_=(i)*grid_-FRUIT_BORDER+(j%2==0?-fw_:0);
-				float sx_=(x_+WIN_WIDTH/2)*PParam::val()->BgdDetectScale;
+				float sx_=(x_+(*it).getWidth()/2);
 				bool in_=false;
-#ifdef USE_BACKGROUND_SUB				
-				for(auto& r:*_rect_contour){
-					if(x_>r.getLeft() && x_<r.getRight()) in_=true;
+#ifdef USE_BACKGROUND_SUB	
+				sx_*=PParam::val()->BgdDetectScale;
+				if(_rect_contour!=NULL && (*_rect_contour).size()>0){				
+					for(auto& r:*_rect_contour){
+						float w_=r.getWidth();
+						if(sx_>=r.getLeft()+w_*.2 && sx_<=r.getRight()-w_*.2) in_=true;
+					}
+				}else{
+					in_=ofRandom(2)<1;
 				}
 #else
 				in_=ofRandom(2)<1;
+				/*if(_rect_contour!=NULL && (*_rect_contour).size()>0){	
+					for(auto& r:*_rect_contour){
+						if(sx_>=r.getLeft() && sx_<=r.getRight()) in_=true;
+					}
+				}*/
 #endif
 				_fruit.push_back(PFruit(&(*it),ofVec2f(x_,
 												-(fh_*PParam::val()->FruitScale)*(j+(j+1)*.2)),(ofRandom(2)<1?45:-45),in_));

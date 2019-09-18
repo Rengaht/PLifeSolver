@@ -8,6 +8,7 @@
 #include "ofxXmlSettings.h"
 
 const string PARAMETER_PATH="param.xml";
+const string CVVAL_PATH="cv_val.xml";
 
 class PParam{
 
@@ -47,7 +48,8 @@ public:
 	float BgdDetectScale;
 	float BgdLearningTime;
 	float BgdThreshold;
-	float ConTourThreshold;
+	float ContourThreshold;
+	float ContourSmoothed;
 
 	string DeleteCmd;
 	string FFmpegCmd;
@@ -63,6 +65,7 @@ public:
 
 	PParam(){
 		readParam();
+		readCVParam();
 
 	}
 	static PParam* val(){
@@ -78,7 +81,7 @@ public:
 		if(_param.loadFile(ofToDataPath(PARAMETER_PATH))){
 			ofLog()<<PARAMETER_PATH<<" loaded!";
 		}else{
-			ofLog()<<"Unable to load xml check data/ folder";
+			ofLog()<<"Unable to load "<<PARAMETER_PATH<<" check data/ folder";
 			file_exist=false;
 		}
         
@@ -110,7 +113,7 @@ public:
 		SerialPort=_param.getValue("SerialPort",0);
 		JandiWebhookIn=_param.getValue("JandiWebhookIn","");
 		JandiWebhookOut=_param.getValue("JandiWebhookOut","");
-		ConTourThreshold=_param.getValue("ContourThreshold",180);
+
 
 		_param.pushTag("SerialCmd");
 		readChannel(_param,"RedDragon",RED_DRAGON);
@@ -123,10 +126,29 @@ public:
 		readChannel(_param,"OrangePassion",ORANGE_PASSION);
 
 		
-		if(!file_exist) saveParameterFile();
+		//if(!file_exist) saveParameterFile();
 
 	
 	}	
+	void readCVParam(){
+			ofxXmlSettings _param;
+		bool file_exist=true;
+		if(_param.loadFile(ofToDataPath(CVVAL_PATH))){
+			ofLog()<<CVVAL_PATH<<" loaded!";
+		}else{
+			ofLog()<<"Unable to load "<<CVVAL_PATH<<" check data/ folder";
+			file_exist=false;
+		}
+        
+		BgdLearningTime=_param.getValue("BgdLearningTime",5);
+		BgdThreshold=_param.getValue("BgdThreshold",10);
+		ContourThreshold=_param.getValue("ContourThreshold",200);
+		ContourSmoothed=_param.getValue("ContourSmoothed",200);
+
+
+		
+		if(!file_exist) saveParameterFile();
+	}
 	void readChannel(ofxXmlSettings p_,string tag_,int index_){
 		int m=p_.getNumTags(tag_);
 		for(int i=0;i<m;++i){
@@ -145,35 +167,13 @@ public:
 		ofxXmlSettings _param;
       
   
-		
-		_param.setValue("GifLength",GifLength);
-		_param.setValue("GifFps",GifFps);
-		_param.setValue("GifSize",GifSize);
-
-		//_param.setValue("JuiceCount",JuiceCount);
-		_param.setValue("FruitStartVel",FruitStartVel);
-		_param.setValue("FruitDensity",FruitDensity);
-		_param.setValue("FruitScale",FruitScale);
-		_param.setValue("FruitRowPerGroup",FruitRowPerGroup);
-
-		_param.setValue("JuiceWaveRow",JuiceWaveRow);
-		_param.setValue("JuiceTime",JuiceTime);
-		_param.setValue("JuiceDropTime",JuiceDropTime);
-
-
-		_param.setValue("QrcodeTime",QrcodeTime);
-		_param.setValue("CardTime",CardTime);
-
-
-		_param.setValue("BgdDetectScale",BgdDetectScale);
 		_param.setValue("BgdLearningTime",BgdLearningTime);
 		_param.setValue("BgdThreshold",BgdThreshold);
+		_param.setValue("ContourThreshold",ContourThreshold);
+		_param.setValue("ContourSmoothed",ContourSmoothed);
+		
 
-		_param.setValue("FFmpegCmd",FFmpegCmd);
-		_param.setValue("FFmpegFilter",FFmpegFilter);
-
-
-		_param.save(PARAMETER_PATH);
+		_param.save(CVVAL_PATH);
 
 
 	}

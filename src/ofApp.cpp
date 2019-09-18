@@ -49,20 +49,24 @@ void ofApp::setup(){
 	ofAddListener(_recorder.recordFinish,this,&ofApp::onRecorderFinish);
 	_recorder.startThread();
 
-	_fbo_contour.allocate(ofGetWidth(),ofGetHeight(),GL_RGB);
+	float h_=ofGetHeight();
+	_fbo_camera.allocate(h_,h_,GL_RGB);
+	//_fbo_contour.allocate(h_,h_,GL_RGB);
 		
 
-	_fbo_bgd_tmp.allocate(_camera.getWidth()*PParam::val()->BgdDetectScale,_camera.getHeight()*PParam::val()->BgdDetectScale,GL_RGB);
-	_fbo_threshold_tmp.allocate(_camera.getWidth(),_camera.getHeight(),GL_RGB);
-	_fbo_bgd.allocate(_camera.getWidth(),_camera.getHeight(),GL_RGB);
+	_fbo_bgd_tmp.allocate(h_*PParam::val()->BgdDetectScale,h_*PParam::val()->BgdDetectScale,GL_RGB);
+	_fbo_threshold_tmp.allocate(h_,h_,GL_RGB);
+	_fbo_bgd.allocate(h_,h_,GL_RGB);
 
-	_masker.setup(_camera.getWidth(),_camera.getHeight());
+	_masker.setup(h_,h_);
 	_masker.newLayer();
 
 	ofEnableSmoothing();
 	
 	sendJandiMessage("[Program] Set Up !!!");
 
+	//------------TMP--------------//
+	_fruit_rain.start();
 }
 
 //--------------------------------------------------------------
@@ -75,16 +79,21 @@ void ofApp::update(){
 	if(!_camera_paused){
 		_camera.update();
 	    if(_camera.isFrameNew()){
-			_finder.update(_camera);
+			drawCameraFrame();
+			_fbo_camera.readToPixels(_pixel_camera);
+			_finder.update(_pixel_camera);
 			//_contour_finder.findContours(_camera);	
 			//drawContour();
 #ifdef USE_BACKGROUND_SUB
 			updateBackground();
+#else
+			_fruit_rain._rect_contour=&_rect_face;
 #endif
 			
 
 		}		
 		if(_recording) _timer_record.update(dt_);
+
 	}
 
 	if(_face_analysis_ready){
@@ -103,43 +112,31 @@ void ofApp::update(){
 //--------------------------------------------------------------
 void ofApp::draw(){
 
-	ofPushMatrix();
-	float cam_scale=(float)ofGetHeight()/_camera.getHeight();
-	float cam_wid=_camera.getWidth()*cam_scale;
-	ofTranslate(ofGetWidth()/2-cam_wid/2,0);
-	ofScale(cam_scale,cam_scale);			
 	
-
-	if(_camera.isInitialized()) 
-		_camera.draw(_camera.getWidth(),0,-_camera.getWidth(),_camera.getHeight());
-
-	if(!_camera_paused && _stage>PSLEEP) drawFaceFrame();
-	ofPopMatrix();
 
 		
 	float scale_=ofGetHeight()/(float)WIN_HEIGHT;
 
 	ofPushMatrix();
-	
-	//ofPushMatrix();
-	//ofTranslate(ofGetWidth()/2,0); //center		
-	//ofScale(scale_,scale_);		
-	//	if(_stage==PDETECT || _stage==PANALYSIS) _fruit_rain.draw();				
-	//ofPopMatrix();
+
 
 	ofPushMatrix();
 	ofTranslate(ofGetWidth()/2-ofGetHeight()/2,0); //left-top
-	ofScale(scale_,scale_);		
+	ofScale(scale_,scale_);			
+		_fbo_camera.draw(0,0);	
+
 		_scene[_stage]->draw();			
+		if(!_camera_paused && _stage>PSLEEP) drawFaceFrame();
+
 	ofPopMatrix();
 	
-	if(!_camera_paused && _stage>PSLEEP){
+	/*if(!_camera_paused && _stage>PSLEEP){
 		ofPushMatrix();
 		ofTranslate(ofGetWidth()/2-cam_wid/2,0);
 		ofScale(cam_scale,cam_scale);				
 			 drawFaceFrame();
 		ofPopMatrix();
-	}
+	}*/
 
 
 	float w_=ofGetHeight()/(float)WIN_HEIGHT*WIN_WIDTH;
@@ -161,41 +158,36 @@ void ofApp::draw(){
 	ofSetColor(255,0,0);	
 	ofDrawBitmapString("fps= "+ofToString(ofGetFrameRate()),ofGetWidth()-200,10);
 
-	ofDrawBitmapString("learning_time= "+ofToString(PParam::val()->BgdLearningTime),ofGetWidth()-200,20);
-	ofDrawBitmapString("threhold= "+ofToString(PParam::val()->BgdThreshold),ofGetWidth()-200,30);
+	ofDrawBitmapString("learning_time= "+ofToString(PParam::val()->BgdLearningTime),ofGetWidth()-200,30);
+	ofDrawBitmapString("threhold= "+ofToString(PParam::val()->BgdThreshold),ofGetWidth()-200,50);
 	
+	ofDrawBitmapString("smoothed= "+ofToString(PParam::val()->ContourSmoothed),ofGetWidth()-200,70);
+		
 	for(int i=0;i<PParam::val()->ChannelCmd.size();++i){
-		ofDrawBitmapString(ofToString(_status_channel[i]),ofGetWidth()-200+i*10,40);
+		ofDrawBitmapString(ofToString(_status_channel[i]),ofGetWidth()-200+i*10,90);
 	}
 
-	/*ofNoFill();
-	float s_=1.0/PParam::val()->BgdDetectScale*cam_scale;
-	ofPushMatrix();
-	ofTranslate(ofGetWidth()/2-cam_wid/2,0);
-	ofScale(s_,s_);
-	for(auto& r_:_rect_contour){
-		ofDrawRectangle(r_.getLeft(),r_.getTop(),r_.getWidth(),r_.getHeight());
-	}
-	ofPopMatrix();*/
-
+	
 	ofPopStyle();
 
 #ifdef USE_BACKGROUND_SUB
 	float tw_=_camera.getWidth()*PParam::val()->BgdDetectScale;
 	float th_=_camera.getHeight()*PParam::val()->BgdDetectScale;
-	_fbo_bgd_tmp.draw(0,0,tw_,th_);
-	if(_img_threshold.isAllocated()) _img_threshold.draw(0,th_,tw_,th_);
-	_fbo_threshold_tmp.draw(0,th_*2,tw_,th_);
+	_fbo_bgd_tmp.draw(0,0,th_,th_);
+	if(_img_threshold.isAllocated()) _img_threshold.draw(0,th_,th_,th_);
+	_fbo_threshold_tmp.draw(0,th_*2,th_,th_);
 #endif
 
 #endif
 
 }
+
 void ofApp::updateBackground(){
+
+	/* draw to down-scaled fbo*/
 	_fbo_bgd_tmp.begin();
 	ofClear(0);
-		if(_camera.isInitialized()) 
-			_camera.draw(0,0,_fbo_bgd_tmp.getWidth(),_fbo_bgd_tmp.getHeight());
+		_fbo_camera.draw(0,0,_fbo_bgd_tmp.getWidth(),_fbo_bgd_tmp.getHeight());		
 	_fbo_bgd_tmp.end();
 			
 	ofPixels pix;	
@@ -222,9 +214,10 @@ void ofApp::updateBackground(){
 
 		auto pp=_contour_finder.getPolylines();
 		for(auto&p:pp){
+				p=p.getSmoothed(PParam::val()->ContourSmoothed,.5);
 		//	if(rec_.intersects(p.getBoundingBox())){
 				auto r_=p.getBoundingBox();
-				r_.x=_img_threshold.getWidth()-r_.x;
+				//r_.x=_img_threshold.getWidth()-r_.x;
 				_rect_contour.push_back(r_);
 
 				ofPath p_;
@@ -232,14 +225,14 @@ void ofApp::updateBackground(){
 				p_.moveTo(p.getVertices()[0]);
 				for(auto& t:p.getVertices()) p_.lineTo(t);
 				p_.close();				
-				p_.simplify(2.0);				
+				//p_.simplify(2.0);				
 				p_.draw();
 
-				/*ofPushStyle();
+				ofPushStyle();
 				ofSetColor(255,0,0);
 				ofNoFill();
-					ofDrawRectangle(p.getBoundingBox());
-				ofPopStyle();*/
+					ofDrawRectangle(r_);
+				ofPopStyle();
 		//	}
 		}
 	
@@ -261,23 +254,23 @@ void ofApp::drawForeground(){
 
 	_masker.beginMask();
 		ofClear(0);
-		_fbo_threshold_tmp.draw(_camera.getWidth(),0,-_camera.getWidth(),_camera.getHeight());
+		_fbo_threshold_tmp.draw(0,0);
 	_masker.endMask();
 
 	_masker.beginLayer();
 		ofClear(0);
-		_camera.draw(_camera.getWidth(),0,-_camera.getWidth(),_camera.getHeight());
+		_fbo_camera.draw(0,0);
 	_masker.endLayer();
 
-	float scale_=ofGetHeight()/(float)WIN_HEIGHT;
+	//float scale_=ofGetHeight()/(float)WIN_HEIGHT;
 	ofPushMatrix();	
-	ofScale(1.0/scale_,1.0/scale_);
+	/*ofScale(1.0/scale_,1.0/scale_);
 	ofTranslate(-ofGetWidth()/2+ofGetHeight()/2,0);
 
 	float cam_scale=(float)ofGetHeight()/_camera.getHeight();
 	float cam_wid=_camera.getWidth()*cam_scale;
 	ofTranslate(ofGetWidth()/2-cam_wid/2,0);
-	ofScale(cam_scale,cam_scale);	
+	ofScale(cam_scale,cam_scale);	*/
 
 		_masker.draw();
 	ofPopMatrix();
@@ -319,6 +312,10 @@ void ofApp::keyPressed(int key){
 			_background.reset();
 #endif
 			break;
+		case 's':
+		case 'S':
+			PParam::val()->saveParameterFile();
+			break;
 		case '-':
 			PParam::val()->BgdLearningTime=min(PParam::val()->BgdLearningTime+1,15.0f);
 			break;
@@ -331,6 +328,13 @@ void ofApp::keyPressed(int key){
 		case ']':
 			PParam::val()->BgdThreshold=max(PParam::val()->BgdThreshold-1,0.0f);
 			break;
+		case ',':
+			PParam::val()->ContourSmoothed=min(PParam::val()->ContourSmoothed+1,500.0f);
+			break;
+		case '.':
+			PParam::val()->ContourSmoothed=max(PParam::val()->ContourSmoothed-1,0.0f);
+			break;
+	
 		/*default:
 			_idx_channel=floor(ofRandom(10));
 			sendJuiceSignal();
@@ -431,6 +435,9 @@ void ofApp::setStage(PStage set_){
 			_fruit_rain.stop();
 			setCameraPause(false);
 			stopBgm();
+
+		
+
 			break;
 	}
 
@@ -448,7 +455,7 @@ void ofApp::setupCamera(){
 
 	_contour_finder.setMinAreaRadius(_camera.getWidth()*PParam::val()->BgdDetectScale*.05);
 	_contour_finder.setMaxAreaRadius(_camera.getWidth()*PParam::val()->BgdDetectScale*.7);
-	_contour_finder.setThreshold(PParam::val()->ConTourThreshold);
+	_contour_finder.setThreshold(PParam::val()->ContourThreshold);
 	_contour_finder.setSimplify(true);
 	_contour_finder.setFindHoles(false);
 
@@ -459,6 +466,25 @@ void ofApp::setCameraPause(bool set_){
 	
 	_camera_paused=set_;
 }
+void ofApp::drawCameraFrame(){
+
+	_fbo_camera.begin();
+	ofClear(255);
+	ofPushMatrix();
+	float cam_scale=(float)_fbo_camera.getHeight()/_camera.getHeight();
+	float cam_wid=_camera.getWidth()*cam_scale;
+	
+	ofTranslate(_fbo_camera.getWidth()/2-cam_wid/2,0);
+	ofScale(cam_scale,cam_scale);			
+	
+	if(_camera.isInitialized()) 
+		_camera.draw(_camera.getWidth(),0,-_camera.getWidth(),_camera.getHeight());
+		
+	ofPopMatrix();
+	
+	_fbo_camera.end();
+}
+
 void ofApp::createUserID(){
 	_user_id="mm"+ofGetTimestampString();
 
@@ -470,6 +496,9 @@ void ofApp::onRecordTimerFinish(int &e){
 }
 
 void ofApp::drawFaceFrame(){
+
+	_rect_face.clear();
+
 	ofPushStyle();
     ofNoFill();
     
@@ -481,9 +510,11 @@ void ofApp::drawFaceFrame(){
         auto p_=rec_.getPosition();
         ofSetColor(238,216,152);
         ofPushMatrix();	
-        ofTranslate(_camera.getWidth()-p_.x,p_.y);
-			ofDrawRectangle(0,0,-rec_.getWidth(),rec_.getHeight());
+        ofTranslate(p_.x,p_.y);
+			ofDrawRectangle(0,0,rec_.getWidth(),rec_.getHeight());
         ofPopMatrix();
+
+		_rect_face.push_back(rec_);
     }
     ofPopStyle();
 }
@@ -541,7 +572,9 @@ void ofApp::urlResponse(ofxHttpResponse &resp_){
         if(json_["result"]=="success"){
 			createQRcode(json_["url"].asString());
 			sendJandiMessage("[User] Finish! "+json_["url"].asString());
-			prepareScene(PRESULT);
+			//prepareScene(PRESULT);
+			int i=0;
+			ofNotifyEvent(_event_receive_result,i);
 		}else{
 			//TODO: something wron!!!
 			prepareScene(PSLEEP);
@@ -559,7 +592,7 @@ void ofApp::parseFaceData(string data_){
 								json_[i]["faceRectangle"]["top"].asInt(),
 								json_[i]["faceRectangle"]["width"].asInt(),
 								json_[i]["faceRectangle"]["height"].asInt());
-			_rect_face.push_back(rect_);
+			//_rect_face.push_back(rect_);
 
             _idx_user_juice=getJuiceFromEmotion(json_[i]["faceAttributes"]["emotion"]);
 			
@@ -691,11 +724,6 @@ void ofApp::sendJuiceSignal(){
 }
 
 
-void ofApp::drawOutFrame(){
-	
-	_img_mask.draw(0,0);
-	_img_frame.draw(0,0);
-}
 
 
 void ofApp::setRecord(bool set_){

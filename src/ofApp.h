@@ -1,7 +1,7 @@
 #pragma once
 
 #define DRAW_DEBUG
-#define USE_BACKGROUND_SUB
+//#define USE_BACKGROUND_SUB
 #define MIRROR_CAMERA
 #define WEEKAND_OFF
 
@@ -67,13 +67,14 @@ class ofApp : public ofBaseApp{
 
 
 		ofEvent<int> _event_recieve_emotion;
+		ofEvent<int> _event_receive_result;
 
 
 		bool faceFound();
 		void drawFaceFrame();
-		ofFbo _fbo_contour;
+		//ofFbo _fbo_contour;
 
-		vector<ofRectangle> _rect_face;
+		list<ofRectangle> _rect_face;
 		ofxJSONElement _user_data;
 
 		string _user_id;
@@ -82,6 +83,10 @@ class ofApp : public ofBaseApp{
 		void createUserID();
 
 		
+		ofFbo _fbo_camera;
+		ofPixels _pixel_camera;
+		void drawCameraFrame();
+
 		PFruitRain _fruit_rain;
 		void drawForeground();
 		list<ofRectangle> _rect_contour;
