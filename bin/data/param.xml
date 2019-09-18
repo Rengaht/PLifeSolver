@@ -32,3 +32,5 @@
 </SerialCmd>
 <SerialPort>0</SerialPort>
 <DelCmd>DEL /F/Q</DelCmd>
+<JandiWebhookIn>https://wh.jandi.com/connect-api/webhook/14606752/a51124a5fac916f4f70cc6b4c42cfb61</JandiWebhookIn>
+<ContourThreshold>200</ContourThreshold>

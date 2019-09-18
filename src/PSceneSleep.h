@@ -114,7 +114,7 @@ public:
 					_confirm_face=true;				
 					_timer_confirm.restart();		
 					_ptr_app->startBgm();
-					
+					_ptr_app->sendJandiMessage("[User] User in !");
 				}
 				_index_face_start+=dt_;
             }

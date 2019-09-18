@@ -47,6 +47,7 @@ public:
 	float BgdDetectScale;
 	float BgdLearningTime;
 	float BgdThreshold;
+	float ConTourThreshold;
 
 	string DeleteCmd;
 	string FFmpegCmd;
@@ -54,6 +55,9 @@ public:
 
 	list<int> JuiceChannel[FRUIT_GROUP];
 	map<int,string> ChannelCmd;
+
+	string JandiWebhookIn;
+	string JandiWebhookOut;
 
 	int SerialPort;
 
@@ -99,11 +103,14 @@ public:
 		BgdLearningTime=_param.getValue("BgdLearningTime",5);
 		BgdThreshold=_param.getValue("BgdThreshold",10);
 
-		DeleteCmd=_param.getValue("FFmpegCmd","");
+		DeleteCmd=_param.getValue("DelCmd","");
 		FFmpegCmd=_param.getValue("FFmpegCmd","");
 		FFmpegFilter=_param.getValue("FFmpegFilter","");
 
 		SerialPort=_param.getValue("SerialPort",0);
+		JandiWebhookIn=_param.getValue("JandiWebhookIn","");
+		JandiWebhookOut=_param.getValue("JandiWebhookOut","");
+		ConTourThreshold=_param.getValue("ContourThreshold",180);
 
 		_param.pushTag("SerialCmd");
 		readChannel(_param,"RedDragon",RED_DRAGON);
@@ -115,6 +122,7 @@ public:
 		readChannel(_param,"Pineapple",PINEAPPLE);
 		readChannel(_param,"OrangePassion",ORANGE_PASSION);
 
+		
 		if(!file_exist) saveParameterFile();
 
 	

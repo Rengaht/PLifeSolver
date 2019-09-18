@@ -1,7 +1,7 @@
 #pragma once
 
 #define DRAW_DEBUG
-//#define USE_BACKGROUND_SUB
+#define USE_BACKGROUND_SUB
 #define MIRROR_CAMERA
 #define WEEKAND_OFF
 
@@ -112,12 +112,14 @@ class ofApp : public ofBaseApp{
 		void stopBgm();
 		void startBgm();
 
+		void sendJandiMessage(string message_);
+
 	private:
 
 		float _millis_now;
 
 		ofImage _img_frame,_img_mask;
-		void drawOutFrame();
+		
 
 		ofVideoGrabber _camera;
         ofxCv::ObjectFinder _finder;

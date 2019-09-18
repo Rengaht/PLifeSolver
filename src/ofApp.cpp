@@ -18,7 +18,6 @@ void ofApp::setup(){
     //ofHideCursor();
 	//ofSetFullscreen(true);
 
-
 	loadScene();
 	setupCamera();
 	setupSerial();
@@ -61,7 +60,8 @@ void ofApp::setup(){
 	_masker.newLayer();
 
 	ofEnableSmoothing();
-
+	
+	sendJandiMessage("[Program] Set Up !!!");
 
 }
 
@@ -159,11 +159,14 @@ void ofApp::draw(){
 #ifdef DRAW_DEBUG
 	ofPushStyle();
 	ofSetColor(255,0,0);	
-	ofDrawBitmapString("fps= "+ofToString(ofGetFrameRate()),ofGetWidth()-100,10);
+	ofDrawBitmapString("fps= "+ofToString(ofGetFrameRate()),ofGetWidth()-200,10);
 
 	ofDrawBitmapString("learning_time= "+ofToString(PParam::val()->BgdLearningTime),ofGetWidth()-200,20);
 	ofDrawBitmapString("threhold= "+ofToString(PParam::val()->BgdThreshold),ofGetWidth()-200,30);
 	
+	for(int i=0;i<PParam::val()->ChannelCmd.size();++i){
+		ofDrawBitmapString(ofToString(_status_channel[i]),ofGetWidth()-200+i*10,40);
+	}
 
 	/*ofNoFill();
 	float s_=1.0/PParam::val()->BgdDetectScale*cam_scale;
@@ -307,7 +310,8 @@ void ofApp::keyPressed(int key){
 			uploadImage("test");
 			break;
 		case 'g':
-			createFruitImage();
+			//createFruitImage();
+			sendJandiMessage("send test");
 			break;
 		case 'b':
 		case 'B':
@@ -368,7 +372,7 @@ void ofApp::loadScene(){
 	_soundfx[3].loadSound("sound/result.wav");
 	_soundfx[4].loadSound("sound/shutter.wav");
 
-	_sound_bgm.loadSound("sound/Summer_Smile.mp3");
+	_sound_bgm.loadSound("sound/Summer_Smile.wav");
 	_sound_bgm.setLoop(true);
 	_sound_bgm.setVolume(.4);
 
@@ -444,7 +448,7 @@ void ofApp::setupCamera(){
 
 	_contour_finder.setMinAreaRadius(_camera.getWidth()*PParam::val()->BgdDetectScale*.05);
 	_contour_finder.setMaxAreaRadius(_camera.getWidth()*PParam::val()->BgdDetectScale*.7);
-	_contour_finder.setThreshold(180);
+	_contour_finder.setThreshold(PParam::val()->ConTourThreshold);
 	_contour_finder.setSimplify(true);
 	_contour_finder.setFindHoles(false);
 
@@ -536,6 +540,7 @@ void ofApp::urlResponse(ofxHttpResponse &resp_){
 
         if(json_["result"]=="success"){
 			createQRcode(json_["url"].asString());
+			sendJandiMessage("[User] Finish! "+json_["url"].asString());
 			prepareScene(PRESULT);
 		}else{
 			//TODO: something wron!!!
@@ -644,6 +649,9 @@ void ofApp::parseChannelStatus(){
 
 			if(_parse_index<0 || _parse_index>=PParam::val()->ChannelCmd.size()) continue;
 
+			if(_status_channel[_parse_index+1]==1){
+				sendJandiMessage("[Juice] Channel "+ofToString(_parse_index)+" empty !!!");
+			}
 			_status_channel[_parse_index+1]=0;
 			_parse_index++;
 			//ofLog()<<"--------- channel= "<<_parse_index<<" status= 0 ---------";
@@ -679,6 +687,7 @@ void ofApp::sendJuiceSignal(){
 
 	auto c_=PParam::val()->ChannelCmd[_idx_channel].c_str();
 	_serial.writeByte(c_[0]);	
+	sendJandiMessage("[User] Take juice= "+ofToString(_idx_user_juice)+" channel= "+ofToString(_idx_channel));
 }
 
 
@@ -712,8 +721,12 @@ void ofApp::saveCameraFrame(){
 	float w_=(float)CAM_WIDTH*scale_;
 
 	_fbo_save.begin();
-	ofClear(255);
+	ofClear(255,0);
+#ifdef USE_BACKGROUND_SUB
+		drawForeground();
+#else
 		_camera.draw(PParam::val()->GifSize/2-w_/2,0,w_,PParam::val()->GifSize);		
+#endif
 	_fbo_save.end();
 	
 
@@ -756,7 +769,7 @@ void ofApp::createFruitImage(){
 			_fbo_save.readToPixels(pix);
 			ofSaveImage(pix,"juice/"+ofToString(x+1)+"/"+ofToString(i,4,'0')+".png");
 
-			for(int i=0;i<12;++i)
+			for(int i=0;i<6;++i)
 				_fruit_rain.update(16);
 			//_fruit_rain.update(1000/(float)GIF_FPS*20);
 		}
@@ -809,4 +822,14 @@ void ofApp::startBgm(){
 }
 void ofApp::stopBgm(){
 	_timer_bgm_out.restart();
+}
+
+void ofApp::sendJandiMessage(string message_){
+	ofxHttpForm form_;
+    form_.action=PParam::val()->JandiWebhookIn;
+    form_.method=OFX_HTTP_POST;
+	form_.contentType="application/json";
+	form_.addFormField("body",message_);
+    
+    _http_utils.addForm(form_);
 }

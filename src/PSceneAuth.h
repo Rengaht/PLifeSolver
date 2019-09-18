@@ -75,9 +75,11 @@ public:
 		
 		_timer_hint.update(dt_);		
 		_timer_confirm.update(dt_);
-		if(!_sound_confirm_played && _timer_confirm.valEaseInOut()*3>2){
-			_sound_confirm_played=true;
-			_ptr_app->playSound(ofApp::PSound::SCHECK);
+		if(_ptr_app->faceFound()){
+			if(!_sound_confirm_played && _timer_confirm.valEaseInOut()*3>2){
+				_sound_confirm_played=true;
+				_ptr_app->playSound(ofApp::PSound::SCHECK);
+			}
 		}
 
 		_glow.update(dt_);
@@ -100,12 +102,13 @@ public:
 			_timer_hint.restart();		
 			_ptr_app->playSound(ofApp::PSound::SCOUNT);
 		}else{
-			_timer_confirm.restart();
+			if(_ptr_app->faceFound()) _timer_confirm.restart();
+			else _ptr_app->prepareScene(ofApp::PSLEEP);
 		}
 	}
 	void onTimerConfirmFinish(int &e){
-		
 		_ptr_app->prepareScene(ofApp::PDETECT);
+		
 	}
 
 	/*void end(){
