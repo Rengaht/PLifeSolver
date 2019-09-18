@@ -63,6 +63,12 @@ public:
 
 	int SerialPort;
 
+	float CameraScale;
+	ofVec2f CameraPosition;
+
+	float ScreenScale;
+	ofVec2f ScreenPosition;
+
 	PParam(){
 		readParam();
 		readCVParam();
@@ -145,7 +151,13 @@ public:
 		ContourThreshold=_param.getValue("ContourThreshold",200);
 		ContourSmoothed=_param.getValue("ContourSmoothed",200);
 
+		CameraScale=_param.getValue("CameraScale",1.0);
+		CameraPosition.x=_param.getValue("CameraPositionX",0.0);
+		CameraPosition.y=_param.getValue("CameraPositionY",0.0);
 
+		ScreenScale=_param.getValue("ScreenScale",1.0);
+		ScreenPosition.x=_param.getValue("ScreenPositionX",0.0);
+		ScreenPosition.y=_param.getValue("ScreenPositionY",0.0);
 		
 		if(!file_exist) saveParameterFile();
 	}
@@ -172,6 +184,15 @@ public:
 		_param.setValue("ContourThreshold",ContourThreshold);
 		_param.setValue("ContourSmoothed",ContourSmoothed);
 		
+		_param.setValue("CameraPositionX",CameraPosition.x);
+		_param.setValue("CameraPositionY",CameraPosition.y);
+		_param.setValue("CameraScale",CameraScale);
+
+
+		_param.setValue("ScreenPositionX",ScreenPosition.x);
+		_param.setValue("ScreenPositionY",ScreenPosition.y);
+		_param.setValue("ScreenScale",ScreenScale);
+
 
 		_param.save(CVVAL_PATH);
 

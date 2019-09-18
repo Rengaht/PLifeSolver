@@ -12,6 +12,7 @@ class PSceneAnalysis:public SceneBase{
 	PGlowLine _glow;
 
 	int _idx_hint;
+	int _count_hint;
 	bool _receive_result;
 
 public:
@@ -60,7 +61,7 @@ public:
 		_glow.update(dt_);
 		_timer_hint.update(dt_);
 
-		if(_receive_result && _idx_hint>=NUM_HINT_ANALYSIS-1){
+		if(_receive_result && _count_hint>=NUM_HINT_ANALYSIS-1){
 			_ptr_app->prepareScene(ofApp::PRESULT);
 			_receive_result=false;
 		}
@@ -69,16 +70,18 @@ public:
 	void init(){
 		SceneBase::init();
 		_idx_hint=0;
+		_count_hint=0;
 		_timer_hint.restart();
 		_receive_result=false;
 	}
 	void onSceneInFinish(int &e){
-		_ptr_app->sendFaceRequest();
+		//_ptr_app->sendFaceRequest();
 	}
 	void onTimerHintFinish(int &e){
 		
 		(++_idx_hint)%=NUM_HINT_ANALYSIS;		
 		_timer_hint.restart();
+		_count_hint++;
 
 		if(_idx_hint==2) _glow.setWidth(280);
 		else if(_idx_hint>2) _glow.setWidth(220);

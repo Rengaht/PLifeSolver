@@ -61,7 +61,9 @@ class ofApp : public ofBaseApp{
 		
 		PParam::PJuice getJuice(string mood_);
 		int checkJuiceStorage(PParam::PJuice get_);
+		
 		void sendJuiceSignal();
+		void sendSleepLight();
 		ofSerial _serial;
 		void setupSerial();
 
@@ -95,6 +97,7 @@ class ofApp : public ofBaseApp{
 		FrameTimer _timer_record;
 		int _idx_record;
 		void setRecord(bool set_);
+		bool _recorder_save_finish;
 
 
 		/* share */
@@ -148,7 +151,7 @@ class ofApp : public ofBaseApp{
 		void saveCameraFrame();
 		void onRecorderFinish(int &e);
 		void onRecordTimerFinish(int &e);
-
+		void onGifFinish(int &e);
 
 
 		void createFruitImage();
@@ -163,6 +166,7 @@ class ofApp : public ofBaseApp{
 		void parseChannelStatus();
 		int _parse_index;
 		
+	
 		
 
 };

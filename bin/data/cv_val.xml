@@ -2,3 +2,9 @@
 <BgdThreshold>30.000000000</BgdThreshold>
 <ContourThreshold>200.000000000</ContourThreshold>
 <ContourSmoothed>191.000000000</ContourSmoothed>
+<CameraPositionX>0.000000000</CameraPositionX>
+<CameraPositionY>0.000000000</CameraPositionY>
+<CameraScale>1.000000000</CameraScale>
+<ScreenPositionX>0.000000000</ScreenPositionX>
+<ScreenPositionY>0.000000000</ScreenPositionY>
+<ScreenScale>1.000000000</ScreenScale>

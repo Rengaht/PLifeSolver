@@ -47,6 +47,7 @@ void ofApp::setup(){
 	ofAddListener(_timer_record.finish_event,this,&ofApp::onRecordTimerFinish);
 	
 	ofAddListener(_recorder.recordFinish,this,&ofApp::onRecorderFinish);
+	ofAddListener(_recorder.gifFinish,this,&ofApp::onGifFinish);
 	_recorder.startThread();
 
 	float h_=ofGetHeight();
@@ -96,9 +97,15 @@ void ofApp::update(){
 
 	}
 
-	if(_face_analysis_ready){
-		_face_analysis_ready=false;
+	if(_recorder_save_finish){
+		_recorder_save_finish=false;
+		sendFaceRequest();		
 	}
+	//if(_face_analysis_ready){
+	//	_face_analysis_ready=false;
+	//	//_recorder.createGif(_idx_user_juice);	
+	//	//uploadImage(_user_id);		
+	//}
 
 	_fruit_rain.update(dt_);
 
@@ -115,13 +122,13 @@ void ofApp::draw(){
 	
 
 		
-	float scale_=ofGetHeight()/(float)WIN_HEIGHT;
+	float scale_=ofGetHeight()/(float)WIN_HEIGHT*PParam::val()->ScreenScale;
 
 	ofPushMatrix();
 
 
 	ofPushMatrix();
-	ofTranslate(ofGetWidth()/2-ofGetHeight()/2,0); //left-top
+	ofTranslate(ofGetWidth()/2-ofGetHeight()/2+PParam::val()->ScreenPosition.x,PParam::val()->ScreenPosition.y); //left-top
 	ofScale(scale_,scale_);			
 		_fbo_camera.draw(0,0);	
 
@@ -435,9 +442,7 @@ void ofApp::setStage(PStage set_){
 			_fruit_rain.stop();
 			setCameraPause(false);
 			stopBgm();
-
-		
-
+			sendSleepLight();		
 			break;
 	}
 
@@ -471,10 +476,10 @@ void ofApp::drawCameraFrame(){
 	_fbo_camera.begin();
 	ofClear(255);
 	ofPushMatrix();
-	float cam_scale=(float)_fbo_camera.getHeight()/_camera.getHeight();
+	float cam_scale=(float)_fbo_camera.getHeight()/_camera.getHeight()*PParam::val()->CameraScale;
 	float cam_wid=_camera.getWidth()*cam_scale;
 	
-	ofTranslate(_fbo_camera.getWidth()/2-cam_wid/2,0);
+	ofTranslate(_fbo_camera.getWidth()/2-cam_wid/2+PParam::val()->CameraPosition.x,PParam::val()->CameraPosition.y);
 	ofScale(cam_scale,cam_scale);			
 	
 	if(_camera.isInitialized()) 
@@ -491,8 +496,11 @@ void ofApp::createUserID(){
 }
 
 void ofApp::onRecordTimerFinish(int &e){
-	if(_recording) saveCameraFrame();
-	_timer_record.restart();
+	if(_recording){
+		saveCameraFrame();
+		_idx_record++;
+		_timer_record.restart();
+	}
 }
 
 void ofApp::drawFaceFrame(){
@@ -532,7 +540,7 @@ void ofApp::sendFaceRequest(){
     tmp_.setFromPixels(_camera.getPixels().getData(),_camera.getWidth(),_camera.getHeight(),OF_IMAGE_COLOR);
     tmp_.mirror(false, true);
     tmp_.save("raw/"+_user_id+".jpg");*/
-    ofBuffer data_=ofBufferFromFile("tmp/"+_user_id+"_0000.png",true);
+    ofBuffer data_=ofBufferFromFile("tmp/"+_user_id+"_"+ofToString(_idx_record-1,4,'0')+".png",true);
 
 	ofxHttpForm form_;
     form_.action=url_;
@@ -562,6 +570,7 @@ void ofApp::urlResponse(ofxHttpResponse &resp_){
             int event=_stage;
 			ofNotifyEvent(_event_recieve_emotion,event);
 			//prepareScene(PRESULT);
+
         }
              
 	}else if(resp_.url.find("mmlab.com.tw")!=-1){
@@ -587,6 +596,13 @@ void ofApp::parseFaceData(string data_){
 	ofxJSONElement json_;
 	if(json_.parse(data_)){
 		int len=json_.size();
+		
+		/* No Face detected */
+		if(len<1){
+			prepareScene(PSLEEP);
+			return;
+		}
+
 		for(int i=0;i<1;++i){
 			ofRectangle rect_(json_[i]["faceRectangle"]["left"].asInt(),
 								json_[i]["faceRectangle"]["top"].asInt(),
@@ -596,15 +612,15 @@ void ofApp::parseFaceData(string data_){
 
             _idx_user_juice=getJuiceFromEmotion(json_[i]["faceAttributes"]["emotion"]);
 			
+
+			/* no juice available */
 			if(_idx_user_juice<0){
-				prepareScene(PSLEEP);
-				return;
+				_idx_user_juice=floor(ofRandom(FRUIT_GROUP));
 			}
 
-			_recorder.createGif(_idx_user_juice);
+			
 			_face_analysis_ready=true;
-				
-			 uploadImage(_user_id);
+			_recorder.createGif(_idx_user_juice);	
 		}
         _user_data["face"]=json_;
 	}
@@ -624,6 +640,7 @@ int ofApp::getJuiceFromEmotion(ofxJSONElement emotion_){
 		int t=getJuice(n);
 		if(emotion_[n].asFloat()>=val_){
             int cc=checkJuiceStorage((PParam::PJuice)t);
+			//ofLog()<<"check storage "<<t<<" = "<<cc;
             if(cc>-1){
                 mood_=n;
                 juice_=t;
@@ -704,7 +721,9 @@ int ofApp::checkJuiceStorage(PParam::PJuice get_){
 
 	int available_channel_=-1;	
 	for(auto& p:PParam::val()->JuiceChannel[get_]){
-		if(_status_channel[p]==1) available_channel_=p;
+		ofLog()<<get_<<"- channel="<<p<<" status="<<_status_channel[p];
+		if(_status_channel[p]==1) 
+			available_channel_=p;
 	}
 
 	return available_channel_;
@@ -723,6 +742,9 @@ void ofApp::sendJuiceSignal(){
 	sendJandiMessage("[User] Take juice= "+ofToString(_idx_user_juice)+" channel= "+ofToString(_idx_channel));
 }
 
+void ofApp::sendSleepLight(){
+	_serial.writeByte('s');	
+}
 
 
 
@@ -739,7 +761,11 @@ void ofApp::setRecord(bool set_){
 		ofSystem(PParam::val()->DeleteCmd+" "+ofToDataPath("tmp\\")+"*.png");
 
 		ofLog()<<"start recording.... "<<ofGetElapsedTimeMillis();
+		_recorder_save_finish=false;
+		_face_analysis_ready=false;
+
 	}else{
+		_recorder.setFinishFrame(_idx_record);
 		_timer_record.stop();
 		ofLog()<<"end recording..."<<ofGetElapsedTimeMillis()<<" #fr= "<<_idx_record;
 	}
@@ -806,9 +832,11 @@ void ofApp::createFruitImage(){
 
 void ofApp::onRecorderFinish(int &e){
 	ofLog()<<"Recorder finish !!!";
-		
+	_recorder_save_finish=true;
 }
-
+void ofApp::onGifFinish(int &e){
+	uploadImage(_user_id);
+}
 void ofApp::uploadImage(string id_){
 	
 	ofLog()<<"Upload Image !!!";

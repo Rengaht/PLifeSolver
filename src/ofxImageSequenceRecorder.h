@@ -20,7 +20,9 @@ public:
 	string _user_id;
 	int _juice_id;
 
-	ofEvent<int> recordFinish;
+	int _finish_frame;
+
+	ofEvent<int> recordFinish,gifFinish;
 	int _save_count;
       
     ofxImageSequenceRecorder(){  
@@ -59,7 +61,7 @@ public:
                 q.pop();           
 				_save_count++;
 				
-				if(counter>0 && counter==_save_count){
+				if(counter>0 && _finish_frame==_save_count){
 					
 					counter=0;
 					_save_count=0;
@@ -82,6 +84,7 @@ public:
 		ofLog()<<cmd;
 		ofSystem(cmd);
 		ofLog()<<"----------- finish create gif ------------";
+		ofNotifyEvent(gifFinish,counter,this);
 	}
     void addFrame(ofImage &img){
         addFrame(img.getPixelsRef());
@@ -112,6 +115,10 @@ public:
         q.push(qImage);
         
     }    
+	void setFinishFrame(int set_){
+		_finish_frame=set_;
+	}
+	
 };  
 
 #endif
