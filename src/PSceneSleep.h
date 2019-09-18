@@ -113,9 +113,8 @@ public:
                 if(!_confirm_face && _index_face_start>=FACE_DETECT_FRAME){
 					_confirm_face=true;				
 					_timer_confirm.restart();		
+					_ptr_app->startBgm();
 					
-					
-
 				}
 				_index_face_start+=dt_;
             }

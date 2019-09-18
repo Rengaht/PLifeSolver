@@ -4,8 +4,8 @@
 
 #include "ofxSvg.h"
 
-//#define DROP_VEL 0
-//#define DROP_ACC .5
+#define DROP_VEL 0
+#define DROP_ACC .5
 
 //#define MJUICE_ROW 5
 //#define JUICE_INTERVAL 3000
@@ -37,8 +37,8 @@ public:
         
         _hei=hei_;
         
-        _vel=ofVec2f(0);
-        _acc=ofVec2f(0);
+        _vel=ofVec2f(0,DROP_VEL);
+        _acc=ofVec2f(0,DROP_ACC);
     }
     void draw(float alpha_){
         ofPushStyle();

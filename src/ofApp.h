@@ -1,11 +1,9 @@
 #pragma once
 
 #define DRAW_DEBUG
-#define USE_BACKGROUND_SUB
+//#define USE_BACKGROUND_SUB
 #define MIRROR_CAMERA
 #define WEEKAND_OFF
-//#define BGD_DETECT_SCALE 0.2
-
 
 #define CAM_WIDTH 1920
 #define CAM_HEIGHT 1080
@@ -13,14 +11,6 @@
 #define WIN_WIDTH 1920
 #define WIN_HEIGHT 1080
 #define FRUIT_GROUP 8
-
-//#define FRUIT_COUNT 18
-//#define MJUICE_RESULT 8
-//
-//#define GIF_FPS 12
-//#define GIF_HEIGHT 700
-//#define GIF_LENGTH 5
-
 
 
 #include "ofMain.h"
@@ -101,6 +91,7 @@ class ofApp : public ofBaseApp{
 		int _idx_record;
 		void setRecord(bool set_);
 
+
 		/* share */
 		bool _face_analysis_ready;
 		
@@ -118,6 +109,8 @@ class ofApp : public ofBaseApp{
 		void mouseReleased(int x, int y, int button);
 		void exit();
 	
+		void stopBgm();
+		void startBgm();
 
 	private:
 
@@ -154,9 +147,15 @@ class ofApp : public ofBaseApp{
 		void createFruitImage();
 
 		ofSoundPlayer _soundfx[5];
+		ofSoundPlayer _sound_bgm;
+		FrameTimer _timer_bgm_in,_timer_bgm_out;
+
+		void updateSound(float dt_);
 
 		vector<int> _status_channel;
 		void parseChannelStatus();
 		int _parse_index;
+		
+		
 
 };

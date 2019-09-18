@@ -16,7 +16,15 @@ public:
 	static PParam* _instance;	
 	
 	string FolderExport;
-	enum PJuice {RED_DRAGON,HONEY_LEMON,VEGETABLE,BEETROOT,CARROT,COCONUT,PINEAPPLE,ORANGE_PASSION};
+	enum PJuice {RED_DRAGON,
+				HONEY_LEMON,
+				VEGETABLE,
+				BEETROOT,
+				CARROT,
+				COCONUT,
+				PINEAPPLE,
+				ORANGE_PASSION,
+				EMPTY};
 		
 	
 	int GifLength;

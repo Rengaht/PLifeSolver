@@ -155,11 +155,11 @@ public:
 	}
 	void addFruit(int index_){
 
-		if(_idx_group<0) return;
+		if(index_<0) return;
 
 		float grid_=(ofGetHeight()+FRUIT_BORDER*2)/(float)PParam::val()->FruitDensity;
 		
-		auto it=_img_fruit[_idx_group].begin();
+		auto it=_img_fruit[index_].begin();
 		float fw_=(*it).getWidth();
 		float fh_=(*it).getHeight();
 		
@@ -172,11 +172,17 @@ public:
 				float x_=(i)*grid_-FRUIT_BORDER+(j%2==0?-fw_:0);
 				float sx_=(x_+WIN_WIDTH/2)*PParam::val()->BgdDetectScale;
 				bool in_=false;
+#ifdef USE_BACKGROUND_SUB				
 				for(auto& r:*_rect_contour){
 					if(x_>r.getLeft() && x_<r.getRight()) in_=true;
 				}
+#else
+				in_=ofRandom(2)<1;
+#endif
 				_fruit.push_back(PFruit(&(*it),ofVec2f(x_,
 												-(fh_*PParam::val()->FruitScale)*(j+(j+1)*.2)),(ofRandom(2)<1?45:-45),in_));
+
+
 			}
 		}
 	}

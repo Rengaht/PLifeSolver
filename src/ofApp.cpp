@@ -27,7 +27,7 @@ void ofApp::setup(){
 	//setStage(PSLEEP);
 	_stage=PSLEEP;
 	_scene[_stage]->init();
-	//setStage(PDETECT);
+	setStage(_stage);
 
 
 	ofAddListener(SceneBase::sceneInFinish,this,&ofApp::onSceneInFinish);
@@ -96,6 +96,8 @@ void ofApp::update(){
 	_scene[_stage]->update(dt_);
 
 	parseChannelStatus();
+	updateSound(dt_);
+
 }
 
 //--------------------------------------------------------------
@@ -175,11 +177,14 @@ void ofApp::draw(){
 
 	ofPopStyle();
 
+#ifdef USE_BACKGROUND_SUB
 	float tw_=_camera.getWidth()*PParam::val()->BgdDetectScale;
 	float th_=_camera.getHeight()*PParam::val()->BgdDetectScale;
 	_fbo_bgd_tmp.draw(0,0,tw_,th_);
 	if(_img_threshold.isAllocated()) _img_threshold.draw(0,th_,tw_,th_);
 	_fbo_threshold_tmp.draw(0,th_*2,tw_,th_);
+#endif
+
 #endif
 
 }
@@ -302,7 +307,7 @@ void ofApp::keyPressed(int key){
 			uploadImage("test");
 			break;
 		case 'g':
-			//createFruitImage();
+			createFruitImage();
 			break;
 		case 'b':
 		case 'B':
@@ -363,6 +368,13 @@ void ofApp::loadScene(){
 	_soundfx[3].loadSound("sound/result.wav");
 	_soundfx[4].loadSound("sound/shutter.wav");
 
+	_sound_bgm.loadSound("sound/Summer_Smile.mp3");
+	_sound_bgm.setLoop(true);
+	_sound_bgm.setVolume(.4);
+
+	_timer_bgm_in=FrameTimer(500);	
+	_timer_bgm_out=FrameTimer(2000);	
+
 }
 
 void ofApp::onSceneInFinish(int &e){
@@ -394,7 +406,7 @@ void ofApp::setStage(PStage set_){
 
 	_scene[set_]->init();
 
-	switch(set_){
+	switch(set_){		
 		case PDETECT:
 			createUserID();
 			_fruit_rain.reset();
@@ -414,6 +426,7 @@ void ofApp::setStage(PStage set_){
 		case PSLEEP:
 			_fruit_rain.stop();
 			setCameraPause(false);
+			stopBgm();
 			break;
 	}
 
@@ -571,12 +584,15 @@ int ofApp::getJuiceFromEmotion(ofxJSONElement emotion_){
 	
 	for(auto& n:name_){
 		int t=getJuice(n);
-		if(emotion_[n].asFloat()>=val_ && checkJuiceStorage((PParam::PJuice)t)>-1){
-			mood_=n;
-			juice_=t;
-			val_=emotion_[n].asFloat();
+		if(emotion_[n].asFloat()>=val_){
+            int cc=checkJuiceStorage((PParam::PJuice)t);
+            if(cc>-1){
+                mood_=n;
+                juice_=t;
+                val_=emotion_[n].asFloat();
 
-			_idx_channel=checkJuiceStorage((PParam::PJuice)t);
+                _idx_channel=cc;
+            }
 		}
 	}
 	
@@ -592,7 +608,8 @@ PParam::PJuice ofApp::getJuice(string mood_){
 	if(mood_=="anger") return PParam::COCONUT;
 	if(mood_=="contempt") return PParam::PINEAPPLE;
 	if(mood_=="happiness") return PParam::ORANGE_PASSION;
-	
+	if(mood_=="surprise") return PParam::CARROT;
+	else return PParam::EMPTY;
 }
 
 void ofApp::setupSerial(){
@@ -603,7 +620,7 @@ void ofApp::setupSerial(){
 	}
 	_serial.setup(PParam::val()->SerialPort, 9600);
 
-	for(int i=0;i<PParam::val()->ChannelCmd.size();++i) _status_channel.push_back(0);
+	for(int i=0;i<PParam::val()->ChannelCmd.size()+1;++i) _status_channel.push_back(1);
 	_parse_index=0;
 }
 void ofApp::parseChannelStatus(){
@@ -620,16 +637,16 @@ void ofApp::parseChannelStatus(){
 			
 			if(_parse_index<0 || _parse_index>=PParam::val()->ChannelCmd.size()) continue;
 			
-			_status_channel[_parse_index]=1;
+			_status_channel[_parse_index+1]=1;
 			_parse_index++;
-			ofLog()<<"--------- channel= "<<_parse_index<<" status= 1 ---------";
+			//ofLog()<<"--------- channel= "<<_parse_index<<" status= 1 ---------";
 		}else if(byte_=='0'){
 
 			if(_parse_index<0 || _parse_index>=PParam::val()->ChannelCmd.size()) continue;
 
-			_status_channel[_parse_index]=0;
+			_status_channel[_parse_index+1]=0;
 			_parse_index++;
-			ofLog()<<"--------- channel= "<<_parse_index<<" status= 0 ---------";
+			//ofLog()<<"--------- channel= "<<_parse_index<<" status= 0 ---------";
 		}
 		
 	}
@@ -642,9 +659,11 @@ int ofApp::checkJuiceStorage(PParam::PJuice get_){
 	if(day_==0 || day_==6) return 0;
 #endif
 
+	if(get_==PParam::EMPTY) return -1;
+
 	int available_channel_=-1;	
 	for(auto& p:PParam::val()->JuiceChannel[get_]){
-		if(_status_channel[p]==0) available_channel_=p;
+		if(_status_channel[p]==1) available_channel_=p;
 	}
 
 	return available_channel_;
@@ -774,4 +793,20 @@ void ofApp::createQRcode(string url_){
 
 void ofApp::playSound(PSound p_){
 	_soundfx[p_].play();
+}
+
+void ofApp::updateSound(float dt_){
+	_timer_bgm_in.update(dt_);	
+	_timer_bgm_out.update(dt_);	
+	_sound_bgm.setVolume(_timer_bgm_in.val()*(1.0-_timer_bgm_out.val()));
+	float v=_sound_bgm.getVolume();
+}
+void ofApp::startBgm(){
+	_timer_bgm_out.reset();
+	_timer_bgm_in.restart();
+
+	_sound_bgm.play();
+}
+void ofApp::stopBgm(){
+	_timer_bgm_out.restart();
 }

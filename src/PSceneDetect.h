@@ -3,7 +3,7 @@
 #define PSCENE_DETECT_H
 
 #define MDETECT_COUNT 5
-#define FRUIT_TIME_START 2
+#define FRUIT_TIME_START 1
 #include "PSceneBase.h"
 
 
