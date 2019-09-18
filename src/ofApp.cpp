@@ -15,8 +15,8 @@ ofColor PFruitRain::_color[]={ofColor(236,152,152),ofColor(238,216,152),ofColor(
 //--------------------------------------------------------------
 void ofApp::setup(){
 	ofSetVerticalSync(true);
-    //ofHideCursor();
-	//ofSetFullscreen(true);
+    ofHideCursor();
+	ofSetFullscreen(true);
 
 	loadScene();
 	setupCamera();
@@ -111,7 +111,8 @@ void ofApp::update(){
 
 	_scene[_stage]->update(dt_);
 
-	parseChannelStatus();
+	if(_stage==PSLEEP) parseChannelStatus();
+
 	updateSound(dt_);
 
 }
@@ -311,7 +312,13 @@ void ofApp::keyPressed(int key){
 			break;
 		case 'g':
 			//createFruitImage();
-			sendJandiMessage("send test");
+			//sendJandiMessage("send test");
+			//for(int i=0;i<_status_channel.size();++i) _status_channel[i]=ofRandom(2)<1?1:0;
+			//sendChannelStatus();
+			//_user_id="test";
+			//_idx_user_juice=floor(ofRandom(FRUIT_GROUP));
+			//_idx_channel=floor(ofRandom(10));
+			//uploadImage("mm2019-09-18-21-04-35-084");
 			break;
 		case 'b':
 		case 'B':
@@ -443,6 +450,9 @@ void ofApp::setStage(PStage set_){
 			setCameraPause(false);
 			stopBgm();
 			sendSleepLight();		
+			break;
+		case PAUTH:
+			sendChannelStatus();
 			break;
 	}
 
@@ -576,7 +586,7 @@ void ofApp::urlResponse(ofxHttpResponse &resp_){
 	}else if(resp_.url.find("mmlab.com.tw")!=-1){
 		ofxJSONElement json_;
         json_.parse(resp_.responseBody);
-		//ofLog()<<resp_.responseBody;
+		ofLog()<<resp_.responseBody;
 
         if(json_["result"]=="success"){
 			createQRcode(json_["url"].asString());
@@ -589,6 +599,7 @@ void ofApp::urlResponse(ofxHttpResponse &resp_){
 			prepareScene(PSLEEP);
 		}
 	}
+	
 }
 void ofApp::parseFaceData(string data_){
 	//ofLog()<<"get face data: "<<data_;
@@ -636,18 +647,41 @@ int ofApp::getJuiceFromEmotion(ofxJSONElement emotion_){
 	int juice_=-1;
 	auto name_=emotion_.getMemberNames();
 	
+	// if all empty
+	bool empty_=true;
+	for(int i=0;i<_status_channel.size();++i){
+		if(_status_channel[i]==1){
+			empty_=false;
+			break;
+		}
+	}
+	if(empty_){
+
+		for(auto& n:name_){
+			int t=getJuice(n);
+			if(emotion_[n].asFloat()>=val_){
+        			mood_=n;
+					juice_=t;
+					val_=emotion_[n].asFloat();
+					_idx_channel=-1;
+				
+			}
+		}
+		ofLog()<<mood_<<" ---> "<<juice_<<"  channel= "<<_idx_channel;
+		return juice_;
+	}
+
 	for(auto& n:name_){
 		int t=getJuice(n);
+		int cc=checkJuiceStorage((PParam::PJuice)t);
+		if(cc<0) continue;
+
 		if(emotion_[n].asFloat()>=val_){
-            int cc=checkJuiceStorage((PParam::PJuice)t);
-			//ofLog()<<"check storage "<<t<<" = "<<cc;
-            if(cc>-1){
                 mood_=n;
                 juice_=t;
                 val_=emotion_[n].asFloat();
 
                 _idx_channel=cc;
-            }
 		}
 	}
 	
@@ -679,6 +713,14 @@ void ofApp::setupSerial(){
 	_parse_index=0;
 }
 void ofApp::parseChannelStatus(){
+#ifdef WEEKAND_OFF
+	int day_=ofGetWeekday();
+	if(day_==0 || day_==6){
+		// set all empty!
+		for(int i=0;i<_status_channel.size();++i) _status_channel[i]=0;
+		return;
+	}
+#endif
 
 	if(!_serial.isInitialized()) return;
 
@@ -712,11 +754,6 @@ void ofApp::parseChannelStatus(){
 }
 int ofApp::checkJuiceStorage(PParam::PJuice get_){
 
-#ifdef WEEKAND_OFF
-	int day_=ofGetWeekday();
-	if(day_==0 || day_==6) return 0;
-#endif
-
 	if(get_==PParam::EMPTY) return -1;
 
 	int available_channel_=-1;	
@@ -732,10 +769,6 @@ void ofApp::sendJuiceSignal(){
 	if(!_serial.isInitialized()) return;
 	if(_idx_channel<0) return;
 
-#ifdef WEEKAND_OFF
-	int day_=ofGetWeekday();
-	if(day_==0 || day_==6) return;
-#endif
 
 	auto c_=PParam::val()->ChannelCmd[_idx_channel].c_str();
 	_serial.writeByte(c_[0]);	
@@ -849,7 +882,20 @@ void ofApp::uploadImage(string id_){
     form_.name="Face Upload "+ofToString(ofGetElapsedTimeMillis());
     form_.addFile("file",ofToDataPath(filename_));
     form_.addFormField("guid", _user_id);
+	form_.addFormField("juice",ofToString(_idx_user_juice));
+	form_.addFormField("channel",ofToString(_idx_channel));
     form_.addFormField("action","upload");
+    
+    _http_utils.addForm(form_);
+}
+void ofApp::sendChannelStatus(){
+	
+    ofxHttpForm form_;
+    form_.action="https://mmlab.com.tw/project/naturalbenefits/action.php";
+    form_.method=OFX_HTTP_POST;
+    for(int i=0;i<_status_channel.size();++i)
+		form_.addFormField("channel-"+ofToString(i),ofToString(_status_channel[i]));
+    form_.addFormField("action","channel");
     
     _http_utils.addForm(form_);
 }

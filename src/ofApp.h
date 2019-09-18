@@ -166,7 +166,7 @@ class ofApp : public ofBaseApp{
 		void parseChannelStatus();
 		int _parse_index;
 		
-	
+		void sendChannelStatus();
 		
 
 };
