@@ -9,12 +9,12 @@
 class PSceneAuth:public SceneBase{
 
 	FrameTimer _timer_hint;
-	//FrameTimer _timer_confirm;
+	//FrameTimer _timer_blink;
 
 	int _num_timer;
 
 	ofImage _img_hint;
-	ofImage _img_text[MAUTH_COUNT];
+	ofImage _img_text;
 	ofImage _img_confirm;
 
 	PGlowLine _glow;
@@ -22,14 +22,15 @@ class PSceneAuth:public SceneBase{
 
 public:
 	PSceneAuth(ofApp* set_):SceneBase(set_){
-		_mlayer=1;
+		_mlayer=2;
 		_order_scene=1;
 
 		_timer_hint=FrameTimer(2000);
-		//_timer_confirm=FrameTimer(3000);
+		//_timer_blink=FrameTimer(1200);
+		//_timer_blink.setContinuous(true);
 
 		_img_hint.loadImage("_img_ui/hint_auth.png");
-		
+		_img_text.loadImage("_img_ui/text_auth.png");
 		/*for(int i=0;i<MAUTH_COUNT;++i)
 			_img_text[i].loadImage("_img_ui/text_auth/"+ofToString(i+1)+".png");
 
@@ -46,7 +47,7 @@ public:
 	}
 	void drawLayer(int i){		
 		switch(i){
-			case 0:
+			case 1:
 				// countdown
 				//ofPushStyle();
 				//ofSetColor(255,255*ofClamp(1.0-_timer_hint.val(),0,1)*getLayerAlpha(0));
@@ -55,6 +56,12 @@ public:
 				//ofPopStyle();
 				_img_hint.draw(0,0,WIN_HEIGHT,WIN_HEIGHT);
 				_glow.draw(getLayerAlpha(0));
+				break;
+			case 0:
+				//ofPushStyle();
+				//ofSetColor(255,255*ofClamp(1.0-_timer_blink.val()*.8,0,1)*getLayerAlpha(i));				
+					_img_text.draw(0,0,WIN_HEIGHT,WIN_HEIGHT);
+				//ofPopStyle();
 				break;
 			/*case 1:
 				ofPushStyle();
@@ -82,7 +89,7 @@ public:
 				_ptr_app->playSound(ofApp::PSound::SCHECK);
 			}
 		}*/
-
+		//_timer_blink.update(dt_);
 		_glow.update(dt_);
 	}
 
@@ -94,6 +101,7 @@ public:
 
 	void onSceneInFinish(int &e){
 		_timer_hint.restart();
+		//_timer_blink.restart();
 		//_ptr_app->playSound(ofApp::PSound::SCHECK);
 	}
 	void onTimerHintFinish(int &e){

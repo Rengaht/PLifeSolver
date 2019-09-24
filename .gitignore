@@ -42,3 +42,4 @@ bin/data/output
 bin/data/juice
 .vs
 bin/data/_img_ui/sleep
+*.txt

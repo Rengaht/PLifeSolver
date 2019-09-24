@@ -12,7 +12,6 @@
 #define WIN_HEIGHT 1080
 #define FRUIT_GROUP 8
 
-
 #include "ofMain.h"
 
 #include "ofxCv.h"
@@ -81,6 +80,8 @@ class ofApp : public ofBaseApp{
 
 		string _user_id;
 		int _idx_user_juice,_idx_channel;
+		string _user_gender;
+		int _user_age;
 
 		void createUserID();
 

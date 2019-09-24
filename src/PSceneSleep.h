@@ -5,7 +5,7 @@
 #include "PSceneBase.h"
 #include "PGlowLine.h"
 
-#define FACE_DETECT_FRAME 4000
+#define FACE_DETECT_FRAME 2000
 #define FACE_ANIMATION_LEGNTH 360
 #define FACE_ANIMATION_FPS 30
 

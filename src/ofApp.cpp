@@ -16,7 +16,8 @@ ofColor PFruitRain::_color[]={ofColor(236,152,152),ofColor(238,216,152),ofColor(
 void ofApp::setup(){
 	ofSetVerticalSync(true);
     ofHideCursor();
-	ofSetFullscreen(true);
+	ofLogToFile("log_"+ofGetTimestampString()+".txt");
+	//ofSetFullscreen(true);
 
 	loadScene();
 	setupCamera();
@@ -119,8 +120,6 @@ void ofApp::update(){
 
 //--------------------------------------------------------------
 void ofApp::draw(){
-
-	
 
 		
 	float scale_=ofGetHeight()/(float)WIN_HEIGHT*PParam::val()->ScreenScale;
@@ -300,7 +299,7 @@ void ofApp::keyPressed(int key){
 	switch(key){
 		case 'f':
 		case 'F':
-			ofToggleFullscreen();
+			//ofToggleFullscreen();
 			break;
 		case 'q':
 		case 'Q':
@@ -382,7 +381,7 @@ void ofApp::loadScene(){
 	for(int i=0;i<FRUIT_GROUP;++i)
 		_img_share_text[i].load("_img_ui/share/"+ofToString(i+1)+".png");
 	
-	_qrcode_gen.setColor(ofColor(238,216,152),ofColor(0,0,0,0));
+	_qrcode_gen.setColor(ofColor(0),ofColor(255));
 
 	_soundfx[0].loadSound("sound/check.wav");
 	_soundfx[1].loadSound("sound/count.wav");
@@ -452,7 +451,7 @@ void ofApp::setStage(PStage set_){
 			sendSleepLight();		
 			break;
 		case PAUTH:
-			sendChannelStatus();
+			sendChannelStatus();			
 			break;
 	}
 
@@ -466,7 +465,9 @@ void ofApp::setupCamera(){
 	_finder.setup("haarcascade_frontalface_default.xml");
 	_finder.setPreset(ObjectFinder::Fast);
 	_finder.setFindBiggestObject(true);
-
+	_finder.setMinSizeScale(.25);
+	_finder.setMaxSizeScale(1);
+	//_finder.getTracker().setSmoothingRate(.3);
 
 	_contour_finder.setMinAreaRadius(_camera.getWidth()*PParam::val()->BgdDetectScale*.05);
 	_contour_finder.setMaxAreaRadius(_camera.getWidth()*PParam::val()->BgdDetectScale*.7);
@@ -596,7 +597,7 @@ void ofApp::urlResponse(ofxHttpResponse &resp_){
 			ofNotifyEvent(_event_receive_result,i);
 		}else{
 			//TODO: something wron!!!
-			prepareScene(PSLEEP);
+			//prepareScene(PSLEEP);
 		}
 	}
 	
@@ -615,11 +616,13 @@ void ofApp::parseFaceData(string data_){
 		}
 
 		for(int i=0;i<1;++i){
-			ofRectangle rect_(json_[i]["faceRectangle"]["left"].asInt(),
+			/*ofRectangle rect_(json_[i]["faceRectangle"]["left"].asInt(),
 								json_[i]["faceRectangle"]["top"].asInt(),
 								json_[i]["faceRectangle"]["width"].asInt(),
-								json_[i]["faceRectangle"]["height"].asInt());
+								json_[i]["faceRectangle"]["height"].asInt());*/
 			//_rect_face.push_back(rect_);
+			_user_gender=json_[i]["faceAttributes"]["gender"].asString();
+			_user_age=json_[i]["faceAttributes"]["age"].asFloat();
 
             _idx_user_juice=getJuiceFromEmotion(json_[i]["faceAttributes"]["emotion"]);
 			
@@ -690,13 +693,22 @@ int ofApp::getJuiceFromEmotion(ofxJSONElement emotion_){
 }
 PParam::PJuice ofApp::getJuice(string mood_){
 
+	//return PParam::RED_DRAGON;
+
 	if(mood_=="disgust") return PParam::RED_DRAGON;
-	if(mood_=="neutral") return PParam::HONEY_LEMON;
+	if(mood_=="neutral"){
+		if(ofRandom(2)<1) return PParam::HONEY_LEMON;
+		else return PParam::RED_DRAGON;
+	}
 	if(mood_=="sadness") return PParam::VEGETABLE;
 	if(mood_=="fear") return PParam::BEETROOT;
 	if(mood_=="anger") return PParam::COCONUT;
 	if(mood_=="contempt") return PParam::PINEAPPLE;
-	if(mood_=="happiness") return PParam::ORANGE_PASSION;
+	if(mood_=="happiness"){
+		if(ofRandom(2)<1) return PParam::COCONUT;
+		else return PParam::BEETROOT;
+			//return PParam::ORANGE_PASSION;
+	}
 	if(mood_=="surprise") return PParam::CARROT;
 	else return PParam::EMPTY;
 }
@@ -885,6 +897,8 @@ void ofApp::uploadImage(string id_){
 	form_.addFormField("juice",ofToString(_idx_user_juice));
 	form_.addFormField("channel",ofToString(_idx_channel));
     form_.addFormField("action","upload");
+	form_.addFormField("gender",_user_gender);
+	form_.addFormField("age",ofToString(_user_age));
     
     _http_utils.addForm(form_);
 }
@@ -933,5 +947,5 @@ void ofApp::sendJandiMessage(string message_){
 	form_.contentType="application/json";
 	form_.addFormField("body",message_);
     
-    _http_utils.addForm(form_);
+    //_http_utils.addForm(form_);
 }
