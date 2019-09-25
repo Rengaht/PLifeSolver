@@ -318,6 +318,7 @@ void ofApp::keyPressed(int key){
 			//_idx_user_juice=floor(ofRandom(FRUIT_GROUP));
 			//_idx_channel=floor(ofRandom(10));
 			//uploadImage("mm2019-09-18-21-04-35-084");
+			getJuiceMapping();
 			break;
 		case 'b':
 		case 'B':
@@ -445,6 +446,7 @@ void ofApp::setStage(PStage set_){
 			_fruit_rain.start();			
             break;
 		case PSLEEP:
+			getJuiceMapping();
 			_fruit_rain.stop();
 			setCameraPause(false);
 			stopBgm();
@@ -596,8 +598,21 @@ void ofApp::urlResponse(ofxHttpResponse &resp_){
 			int i=0;
 			ofNotifyEvent(_event_receive_result,i);
 		}else{
-			//TODO: something wron!!!
-			//prepareScene(PSLEEP);
+
+			if(json_["action"]=="getjuice"){
+				_emotion_map.clear();
+
+				auto name_=json_.getMemberNames();
+				for(auto& n:name_){
+					if(_emotion_map.find(n)==_emotion_map.end()) _emotion_map[n]=vector<PParam::PJuice>();
+					
+					ofLog()<<json_[n].isArray()<<"  "<<json_[n].size();
+					for(int i=0;i<json_[n].size();++i)
+						_emotion_map[n].push_back(getJuiceFromName(json_[n][i].asString()));
+
+				}
+
+			}			
 		}
 	}
 	
@@ -693,24 +708,29 @@ int ofApp::getJuiceFromEmotion(ofxJSONElement emotion_){
 }
 PParam::PJuice ofApp::getJuice(string mood_){
 
+
+	auto p=_emotion_map[mood_];
+	int idx_=floor(ofRandom(p.size()));
+	return p[idx_];
+
 	//return PParam::RED_DRAGON;
 
-	if(mood_=="disgust") return PParam::RED_DRAGON;
-	if(mood_=="neutral"){
-		if(ofRandom(2)<1) return PParam::HONEY_LEMON;
-		else return PParam::RED_DRAGON;
-	}
-	if(mood_=="sadness") return PParam::VEGETABLE;
-	if(mood_=="fear") return PParam::BEETROOT;
-	if(mood_=="anger") return PParam::COCONUT;
-	if(mood_=="contempt") return PParam::PINEAPPLE;
-	if(mood_=="happiness"){
-		if(ofRandom(2)<1) return PParam::COCONUT;
-		else return PParam::BEETROOT;
-			//return PParam::ORANGE_PASSION;
-	}
-	if(mood_=="surprise") return PParam::CARROT;
-	else return PParam::EMPTY;
+	//if(mood_=="disgust") return PParam::RED_DRAGON;
+	//if(mood_=="neutral"){
+	//	if(ofRandom(2)<1) return PParam::HONEY_LEMON;
+	//	else return PParam::RED_DRAGON;
+	//}
+	//if(mood_=="sadness") return PParam::VEGETABLE;
+	//if(mood_=="fear") return PParam::BEETROOT;
+	//if(mood_=="anger") return PParam::COCONUT;
+	//if(mood_=="contempt") return PParam::PINEAPPLE;
+	//if(mood_=="happiness"){
+	//	if(ofRandom(2)<1) return PParam::COCONUT;
+	//	else return PParam::BEETROOT;
+	//		//return PParam::ORANGE_PASSION;
+	//}
+	//if(mood_=="surprise") return PParam::CARROT;
+	//else return PParam::EMPTY;
 }
 
 void ofApp::setupSerial(){
@@ -948,4 +968,25 @@ void ofApp::sendJandiMessage(string message_){
 	form_.addFormField("body",message_);
     
     //_http_utils.addForm(form_);
+}
+void ofApp::getJuiceMapping(){
+	ofxHttpForm form_;
+    form_.action="https://mmlab.com.tw/project/naturalbenefits/action_.php";
+    form_.method=OFX_HTTP_POST;
+	form_.contentType="application/json";
+	form_.addFormField("action","getjuice");
+    
+    _http_utils.addForm(form_);
+}
+
+PParam::PJuice ofApp::getJuiceFromName(string name_){
+	if(name_=="RED_DRAGON") return PParam::RED_DRAGON;
+	if(name_=="HONEY_LEMON") return PParam::HONEY_LEMON;
+	if(name_=="VEGETABLE") return PParam::VEGETABLE;
+	if(name_=="BEETROOT") return PParam::BEETROOT;
+	if(name_=="CARROT") return PParam::CARROT;
+	if(name_=="COCONUT") return PParam::COCONUT;
+	if(name_=="PINEAPPLE") return PParam::PINEAPPLE;
+	if(name_=="ORANGE_PASSION") return PParam::ORANGE_PASSION;
+	return PParam::EMPTY;
 }

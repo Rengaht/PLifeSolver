@@ -168,6 +168,8 @@ class ofApp : public ofBaseApp{
 		int _parse_index;
 		
 		void sendChannelStatus();
-		
+		void getJuiceMapping();
+		map<string,vector<PParam::PJuice>> _emotion_map;
+		PParam::PJuice getJuiceFromName(string name_);
 
 };
