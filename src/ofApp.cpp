@@ -65,10 +65,13 @@ void ofApp::setup(){
 
 	ofEnableSmoothing();
 	
+
 	sendJandiMessage("[Program] Set Up !!!");
 
+	_count_send_channel=0;
+
 	//------------TMP--------------//
-	_fruit_rain.start();
+	//_fruit_rain.start();
 }
 
 //--------------------------------------------------------------
@@ -112,7 +115,7 @@ void ofApp::update(){
 
 	_scene[_stage]->update(dt_);
 
-	if(_stage==PSLEEP) parseChannelStatus();
+	if(_stage!=PRESULT) parseChannelStatus();
 
 	updateSound(dt_);
 
@@ -432,12 +435,14 @@ void ofApp::setStage(PStage set_){
 		case PDETECT:
 			createUserID();
 			_fruit_rain.reset();
+			//sendChannelStatus();
 			break;
         case PANALYSIS:
 			setCameraPause(true);
 			//_fruit_rain.reset();
             _fruit_rain.setSlow(false);
 			_fruit_rain.start();	
+			//sendChannelStatus();
             break;
         case PRESULT:
 			_fruit_rain.reset();
@@ -591,7 +596,7 @@ void ofApp::urlResponse(ofxHttpResponse &resp_){
         json_.parse(resp_.responseBody);
 		ofLog()<<resp_.responseBody;
 
-        if(json_["result"]=="success"){
+        if(json_["action"]=="upload"){
 			createQRcode(json_["url"].asString());
 			sendJandiMessage("[User] Finish! "+json_["url"].asString());
 			//prepareScene(PRESULT);
@@ -665,15 +670,8 @@ int ofApp::getJuiceFromEmotion(ofxJSONElement emotion_){
 	int juice_=-1;
 	auto name_=emotion_.getMemberNames();
 	
-	// if all empty
-	bool empty_=true;
-	for(int i=0;i<_status_channel.size();++i){
-		if(_status_channel[i]==1){
-			empty_=false;
-			break;
-		}
-	}
-	if(empty_){
+	// if all empty	
+	if(_channel_all_empty){
 
 		for(auto& n:name_){
 			int t=getJuice(n);
@@ -743,6 +741,7 @@ void ofApp::setupSerial(){
 
 	for(int i=0;i<PParam::val()->ChannelCmd.size()+1;++i) _status_channel.push_back(1);
 	_parse_index=0;
+	_channel_all_empty=false;
 }
 void ofApp::parseChannelStatus(){
 #ifdef WEEKAND_OFF
@@ -762,6 +761,8 @@ void ofApp::parseChannelStatus(){
 		if(byte_=='a'){
 			//ofLog()<<"--------- parse start! ---------";
 			_parse_index=0;
+			sendChannelStatus();
+
 		}else if(byte_=='1'){
 			
 			if(_parse_index<0 || _parse_index>=PParam::val()->ChannelCmd.size()) continue;
@@ -774,7 +775,7 @@ void ofApp::parseChannelStatus(){
 			if(_parse_index<0 || _parse_index>=PParam::val()->ChannelCmd.size()) continue;
 
 			if(_status_channel[_parse_index+1]==1){
-				sendJandiMessage("[Juice] Channel "+ofToString(_parse_index)+" empty !!!");
+				//sendJandiMessage("[Juice] Channel "+ofToString(_parse_index)+" empty !!!");
 			}
 			_status_channel[_parse_index+1]=0;
 			_parse_index++;
@@ -782,6 +783,16 @@ void ofApp::parseChannelStatus(){
 		}
 		
 	}
+
+	// check if all empty
+	bool empty_=true;
+	for(int i=0;i<_status_channel.size();++i){
+		if(_status_channel[i]==1){
+			empty_=false;
+			break;
+		}
+	}
+	_channel_all_empty=empty_;
 
 }
 int ofApp::checkJuiceStorage(PParam::PJuice get_){
@@ -924,6 +935,10 @@ void ofApp::uploadImage(string id_){
 }
 void ofApp::sendChannelStatus(){
 	
+	(++_count_send_channel)%=CHANNEL_UPDATE_RATE;
+	if(_count_send_channel!=0) return;
+
+
     ofxHttpForm form_;
     form_.action="https://mmlab.com.tw/project/naturalbenefits/action.php";
     form_.method=OFX_HTTP_POST;
@@ -967,7 +982,7 @@ void ofApp::sendJandiMessage(string message_){
 	form_.contentType="application/json";
 	form_.addFormField("body",message_);
     
-    //_http_utils.addForm(form_);
+   _http_utils.addForm(form_);
 }
 void ofApp::getJuiceMapping(){
 	ofxHttpForm form_;

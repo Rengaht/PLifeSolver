@@ -17,6 +17,8 @@ class PSceneSleep:public SceneBase{
 	ofImage _img_hint[2];
 	ofImage _img_text[2];
 	ofImage _img_face[FACE_ANIMATION_LEGNTH];
+	ofImage _img_empty,_img_title;
+
 	FrameTimer _timer_animation;
 	
 	int _index_face_start;
@@ -44,9 +46,14 @@ public:
 		_img_text[0].loadImage("_img_ui/text_sleep-1.png");
 		_img_text[1].loadImage("_img_ui/text_sleep-2.png");
 
+		// TODO
+		_img_empty.loadImage("_img_ui/text_empty.png");
+		_img_title.loadImage("_img_ui/text_sleep.png");
+
 		for(int i=0;i<FACE_ANIMATION_LEGNTH;++i){
 			_img_face[i].loadImage("_img_ui/sleep/Comp 1_"+ofToString(i,5,'0')+".png");
 		}
+
 		_timer_animation=FrameTimer(1000.0/FACE_ANIMATION_FPS);
 		_timer_animation.setContinuous(true);
 		_timer_animation.restart();
@@ -81,12 +88,19 @@ public:
 						_img_hint[1].draw(0,0,WIN_HEIGHT,WIN_HEIGHT);
 					ofPopStyle();
 				}
+
+				if(_ptr_app->_channel_all_empty){
+					_img_empty.draw(0,0,WIN_HEIGHT,WIN_HEIGHT);
+				}
+				_img_title.draw(0,0,WIN_HEIGHT,WIN_HEIGHT);
+
 				ofPushMatrix();
 				ofTranslate(WIN_HEIGHT/2,WIN_HEIGHT/2);
 				ofScale(.7,.7);
 					_img_face[_timer_animation.num()%FACE_ANIMATION_LEGNTH].draw(-320,-400);
 				ofPopMatrix();
-				break;
+
+				break;			
 		}
 
 	}

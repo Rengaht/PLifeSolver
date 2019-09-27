@@ -3,7 +3,7 @@
 #define DRAW_DEBUG
 //#define USE_BACKGROUND_SUB
 #define MIRROR_CAMERA
-#define WEEKAND_OFF
+//#define WEEKAND_OFF
 
 #define CAM_WIDTH 1920
 #define CAM_HEIGHT 1080
@@ -11,6 +11,8 @@
 #define WIN_WIDTH 1920
 #define WIN_HEIGHT 1080
 #define FRUIT_GROUP 8
+
+#define CHANNEL_UPDATE_RATE 20
 
 #include "ofMain.h"
 
@@ -100,6 +102,8 @@ class ofApp : public ofBaseApp{
 		void setRecord(bool set_);
 		bool _recorder_save_finish;
 
+		
+		bool _channel_all_empty;
 
 		/* share */
 		bool _face_analysis_ready;
@@ -167,6 +171,7 @@ class ofApp : public ofBaseApp{
 		void parseChannelStatus();
 		int _parse_index;
 		
+		int _count_send_channel;
 		void sendChannelStatus();
 		void getJuiceMapping();
 		map<string,vector<PParam::PJuice>> _emotion_map;
