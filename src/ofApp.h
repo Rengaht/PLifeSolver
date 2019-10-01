@@ -1,5 +1,17 @@
 #pragma once
 
+#define FORCE_MODE
+#define FORCE_JUICE 0
+//enum PJuice {RED_DRAGON, 0
+//				HONEY_LEMON, 1
+//				VEGETABLE, 2
+//				BEETROOT, 3
+//				CARROT, 4
+//				COCONUT, 5
+//				PINEAPPLE, 6
+//				ORANGE_PASSION, 7
+//				EMPTY};
+
 #define DRAW_DEBUG
 //#define USE_BACKGROUND_SUB
 #define MIRROR_CAMERA

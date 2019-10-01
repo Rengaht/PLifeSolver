@@ -300,37 +300,37 @@ void ofApp::keyPressed(int key){
 	string cmd;
 
 	switch(key){
-		case 'f':
-		case 'F':
+		/*case 'f':
+		case 'F':*/
 			//ofToggleFullscreen();
 			break;
-		case 'q':
-		case 'Q':
+		case 'z':
+		case 'Z':
 			prepareScene(PSLEEP);
 			break;
-		case 't':
-			//sendFaceRequest();
-			uploadImage("test");
-			break;
-		case 'g':
-			//createFruitImage();
-			//sendJandiMessage("send test");
-			//for(int i=0;i<_status_channel.size();++i) _status_channel[i]=ofRandom(2)<1?1:0;
-			//sendChannelStatus();
-			//_user_id="test";
-			//_idx_user_juice=floor(ofRandom(FRUIT_GROUP));
-			//_idx_channel=floor(ofRandom(10));
-			//uploadImage("mm2019-09-18-21-04-35-084");
-			getJuiceMapping();
-			break;
-		case 'b':
-		case 'B':
+		//case 't':
+		//	//sendFaceRequest();
+		//	uploadImage("test");
+		//	break;
+		//case 'g':
+		//	//createFruitImage();
+		//	//sendJandiMessage("send test");
+		//	//for(int i=0;i<_status_channel.size();++i) _status_channel[i]=ofRandom(2)<1?1:0;
+		//	//sendChannelStatus();
+		//	//_user_id="test";
+		//	//_idx_user_juice=floor(ofRandom(FRUIT_GROUP));
+		//	//_idx_channel=floor(ofRandom(10));
+		//	//uploadImage("mm2019-09-18-21-04-35-084");
+		//	getJuiceMapping();
+		//	break;
+		/*case 'b':
+		case 'B':*/
 #ifdef USE_BACKGROUND_SUB
 			_background.reset();
 #endif
 			break;
-		case 's':
-		case 'S':
+		case 'x':
+		case 'X':
 			PParam::val()->saveParameterFile();
 			break;
 		case '-':
@@ -351,7 +351,21 @@ void ofApp::keyPressed(int key){
 		case '.':
 			PParam::val()->ContourSmoothed=max(PParam::val()->ContourSmoothed-1,0.0f);
 			break;
-	
+		case '1':
+		case '2':
+		case '3':
+		case '4':
+		case '5':
+		case '6':
+		case '7':
+		case '8':
+			_idx_channel=checkJuiceStorage(PParam::PJuice(key-'1'));
+			sendJuiceSignal();
+			break;
+		default:
+			_serial.writeByte(key);
+			break;
+
 		/*default:
 			_idx_channel=floor(ofRandom(10));
 			sendJuiceSignal();
@@ -662,14 +676,25 @@ void ofApp::parseFaceData(string data_){
 }
 int ofApp::getJuiceFromEmotion(ofxJSONElement emotion_){
 
+
+
 	ofLog()<<emotion_.toStyledString();
+
 
 	// find highest score
 	float val_=0;
 	string mood_;
 	int juice_=-1;
+
+#ifdef FORCE_MODE
+	juice_=FORCE_JUICE;
+	_idx_channel=checkJuiceStorage((PParam::PJuice)juice_);
+	ofLog()<<mood_<<" ---> "<<juice_<<"  channel= "<<_idx_channel;	
+	return juice_;
+#endif
+
 	auto name_=emotion_.getMemberNames();
-	
+
 	// if all empty	
 	if(_channel_all_empty){
 
@@ -834,7 +859,7 @@ void ofApp::setRecord(bool set_){
 		_timer_record.restart();
 
 		//_recorder.startThread();
-		ofSystem(PParam::val()->DeleteCmd+" "+ofToDataPath("tmp\\")+"*.png");
+		ofSystem(PParam::val()->DeleteCmd+" "+ofToDataPath("tmp/")+"*.png");
 
 		ofLog()<<"start recording.... "<<ofGetElapsedTimeMillis();
 		_recorder_save_finish=false;
