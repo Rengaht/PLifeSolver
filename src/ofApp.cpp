@@ -596,14 +596,16 @@ void ofApp::urlResponse(ofxHttpResponse &resp_){
 
 	if(resp_.url.find("azure.com")!=-1){
         //ofLog()<<"receive: "<<resp_.responseBody;
-        parseFaceData(resp_.responseBody);
+        bool res_=parseFaceData(resp_.responseBody);
         
-        if(_stage==PANALYSIS){
+        if(res_ && _stage==PANALYSIS){
             int event=_stage;
 			ofNotifyEvent(_event_recieve_emotion,event);
 			//prepareScene(PRESULT);
 
-        }
+        }else{
+			prepareScene(PSLEEP);
+		}
              
 	}else if(resp_.url.find("mmlab.com.tw")!=-1){
 		ofxJSONElement json_;
@@ -636,7 +638,7 @@ void ofApp::urlResponse(ofxHttpResponse &resp_){
 	}
 	
 }
-void ofApp::parseFaceData(string data_){
+bool ofApp::parseFaceData(string data_){
 	//ofLog()<<"get face data: "<<data_;
     
 	ofxJSONElement json_;
@@ -645,8 +647,8 @@ void ofApp::parseFaceData(string data_){
 		
 		/* No Face detected */
 		if(len<1){
-			prepareScene(PSLEEP);
-			return;
+			//prepareScene(PSLEEP);
+			return false;
 		}
 
 		for(int i=0;i<1;++i){
@@ -671,8 +673,9 @@ void ofApp::parseFaceData(string data_){
 			_recorder.createGif(_idx_user_juice);	
 		}
         _user_data["face"]=json_;
+		return true;
 	}
-
+	return false;
 }
 int ofApp::getJuiceFromEmotion(ofxJSONElement emotion_){
 
